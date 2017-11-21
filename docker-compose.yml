@@ -1,0 +1,12 @@
+version: '2.2'
+services:
+  acc-db:
+    build: ./account-db
+    container_name: "acc-postgres-db"
+    restart: always
+    volumes:
+      - acc-db-data:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+volumes:
+  acc-db-data:
