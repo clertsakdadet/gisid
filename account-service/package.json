@@ -14,7 +14,7 @@
   "author": "Onimuse",
   "license": "None",
   "dependencies": {
-    "bcrypt": "^1.0.3",
+    "bcryptjs": "^2.4.3",
     "crypto-promise": "^2.0.0",
     "koa": "^2.4.1",
     "koa-bodyparser": "^4.2.0",

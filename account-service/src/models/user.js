@@ -1,5 +1,5 @@
 'use strict'
-const bcrypt = require('bcrypt')
+const bcrypt = require('bcryptjs')
 const AppError = require('../utils/errors/appError')
 const errorCode = require('../config/msgConfig.json')
 const logger = require('../utils/logger/account_log')
@@ -108,12 +108,16 @@ module.exports = (sequelize, DataTypes) => {
     }
     try {
       let hash = await bcrypt.hash(password, 10)
+      logger.info('Start encryptPassword5')
       if (!hash) {
+        logger.info('Start encryptPassword6')
         throw new AppError('Unable to hash password.')
       } else {
+        logger.info('Start encryptPassword7')
         return hash
       }
     } catch (err) {
+      logger.info('Start encryptPassword8')
       throw err
     }
   }
@@ -139,8 +143,10 @@ module.exports = (sequelize, DataTypes) => {
         throw new AppError('Username \'' + user.username + '\' isn\'t available.', errorCode.DataAlreadyExists)
       }
 
+      logger.info('Start encryptPassword')
       let encryptPassword = await User.encryptPassword(user.password)
 
+      logger.info('Start createdUser')
       let createdUser = await User.create({
         username: user.username,
         password: encryptPassword,
@@ -149,6 +155,7 @@ module.exports = (sequelize, DataTypes) => {
           fullname: user.fullname
         }
       })
+      logger.info('Done')
 
       if (!createdUser) {
         throw new AppError('Unable to create new User Account.')

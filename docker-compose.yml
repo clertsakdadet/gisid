@@ -3,8 +3,6 @@ services:
   acc-service:
     build: ./account-service
     container_name: account_service
-    ports:
-     - "3010:3001"
     command: sh -c './wait-for acc-db:5432 -- npm start'
     depends_on:
      - acc-db
@@ -21,5 +19,12 @@ services:
       - acc-db-data:/var/lib/postgresql/data
     ports:
       - 5455:5432
+  nginx:
+    build: ./reverse-proxy
+    container_name: "rev_proxy"
+    links:
+     - acc-service
+    ports:
+      - 80:80
 volumes:
   acc-db-data:
