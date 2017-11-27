@@ -4,23 +4,39 @@
   "description": "service for account management",
   "main": "app.js",
   "scripts": {
-    "start": "set NODE_ENV=production&&node app.js",
-    "dev": "nodemon app.js",
+    "start": "sequelize --env production db:migrate && set NODE_ENV=production&&node app.js",
+    "test": "sequelize --env test db:migrate && set NODE_ENV=test&&node app.js",
+    "dev": "sequelize --env development db:migrate && set NODE_ENV=development&&nodemon app.js",
     "db:migrate": "sequelize db:migrate",
     "db:rollback": "sequelize db:migrate:undo",
     "create:migration": "sequelize migration:create"
   },
   "author": "Onimuse",
-  "license": "ISC",
+  "license": "None",
   "dependencies": {
+    "bcrypt": "^1.0.3",
+    "crypto-promise": "^2.0.0",
     "koa": "^2.4.1",
+    "koa-bodyparser": "^4.2.0",
     "koa-helmet": "^3.3.0",
     "koa-morgan": "^1.0.1",
+    "koa-router": "^7.3.0",
+    "koa-validate": "^1.0.7",
+    "nodemailer": "^4.4.0",
+    "pg": "^7.4.0",
+    "pg-hstore": "^2.3.2",
+    "sequelize": "^4.22.9",
     "sequelize-cli": "^3.1.0",
+    "validator": "^9.1.1",
     "winston": "^2.4.0",
     "winston-daily-rotate-file": "^1.7.2"
   },
   "devDependencies": {
     "nodemon": "^1.12.1"
+  },
+  "standard": {
+    "ignore": [
+      "**/locales"
+    ]
   }
 }

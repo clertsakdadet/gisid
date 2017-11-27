@@ -1,0 +1,70 @@
+const config = {
+  app: {
+    host: process.env.HOSTNAME || 'localhost',
+    port: process.env.PORT || 3000,
+    name: process.env.APP_NAME || 'account service'
+  },
+  mail: {
+    confirmEmailUrl: '/authenticate-email',
+    gmailConfig: {
+      service: 'gmail',
+      auth: {
+        user: process.env.GMAIL_ACC || 'noreplygisid@gmail.com',
+        pass: process.env.GMAIL_PW || 'P@ssw0rdgisid'
+      }
+    },
+    SMTPConfig: {
+      host: 'smtp.ethereal.email',
+      port: 587,
+      secure: false, // true for 465, false for other ports
+      auth: {
+        user: process.env.SMPT_ACC || 'test@test.com',
+        pass: process.env.SMPT_PW || 'test'
+      }
+    }
+  },
+  logs: {
+    serviceLogConfig: {
+      filename: './logs/all.log',
+      datePattern: '/yyyy-MM/dd-',
+      prepend: true,
+      level: process.env.ENV === 'development' ? 'debug' : 'info',
+      handleExceptions: true,
+      json: true,
+      maxsize: 5242880, // 5MB
+      maxFiles: 5,
+      createTree: true,
+      colorize: false
+    }
+  },
+  api: {
+    accountAPI: {
+      prefix: '/g/account',
+      signUp: '/signup',
+      confirmEmail: '/confirm-email'
+    }
+  }
+}
+
+config.getPort = function () {
+  return this.app.port
+}
+
+config.getMailConfig = function (type) {
+  return this.mail[type]
+}
+
+config.getEmailConfirmURL = function () {
+  // https://gisid.co.th/g/account/confirm-email?token=dcaddf644369
+  return 'https://' + this.app.host + this.api.accountAPI.prefix + this.api.accountAPI.confirmEmail
+}
+
+config.getServiceLogConfig = function () {
+  return this.logs.serviceLogConfig
+}
+
+config.getServiceConfig = function (name) {
+  return this.api[name]
+}
+
+module.exports = config

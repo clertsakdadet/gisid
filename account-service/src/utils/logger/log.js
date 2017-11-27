@@ -1,19 +1,10 @@
 const winston = require('winston')
 winston.emitErrs = true
-require('winston-daily-rotate-file')
-const transport = new (winston.transports.DailyRotateFile)({
-  filename: './logs/all.log',
-  datePattern: '/yyyy-MM/dd-',
-  prepend: true,
-  level: process.env.ENV === 'development' ? 'debug' : 'info',
-  handleExceptions: true,
-  json: true,
-  maxsize: 5242880, // 5MB
-  maxFiles: 5,
-  createTree: true,
-  colorize: false
-})
 
+const config = require('../../config/appConfig')
+require('winston-daily-rotate-file')
+
+const transport = new (winston.transports.DailyRotateFile)(config.getServiceLogConfig())
 const logger = new winston.Logger({
   transports: [
     transport,

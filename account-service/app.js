@@ -1,8 +1,19 @@
 const Koa = require('koa')
-const helmet = require('koa-helmet')
 const app = new Koa()
+const router = require('./src/routes')
+// const models = require('./src/models')
+const config = require('./src/config/appConfig')
+const logger = require('./src/utils/logger/log')
 
-app.use(helmet())
-app.use(require('./src/middlewares/all'))
+require('./src/middlewares')(app)
+app.use(router.routes(), router.allowedMethods())
 
-app.listen(3000)
+// if (process.env.NODE_ENV === 'test') {
+//   models.sequelize.sync({force: true})
+// }
+
+if (!module.parent) {
+  let port = config.getPort()
+  logger.log('info', config.app.name + ' is listening on port: ' + port)
+  app.listen(port)
+}

@@ -6,4 +6,4 @@ ENV POSTGRES_USER gismin
 ENV POSTGRES_PASSWORD xYaXB3fDyUAN2hHnLJcj
 
 # INITIAL TABLE
-#ADD create_user_table.sql /docker-entrypoint-initdb.d/
+ADD init_test_db.sh /docker-entrypoint-initdb.d/
