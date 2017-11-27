@@ -13,8 +13,8 @@ services:
     environment:
      - DB_HOSTNAME=acc-db
      - DB_PORT=5432
-     #- http_proxy=http://10.254.7.89:8080
-     #- https_proxy=http://10.254.7.89:8080
+     - http_proxy=http://10.254.7.89:8080
+     - https_proxy=http://10.254.7.89:8080
   acc-db:
     build: ./account-db
     container_name: "acc-postgres-db"
