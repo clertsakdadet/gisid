@@ -4,7 +4,7 @@ winston.emitErrs = true
 const config = require('../../config/appConfig')
 require('winston-daily-rotate-file')
 
-const transport = new (winston.transports.DailyRotateFile)(config.getLogConfig('serviceLogConfig'))
+const transport = new (winston.transports.DailyRotateFile)(config.getLogConfig('accountErrorLogConfig'))
 const logger = new winston.Logger({
   transports: [
     transport,
@@ -19,8 +19,3 @@ const logger = new winston.Logger({
 })
 
 module.exports = logger
-module.exports.stream = {
-  write: function (message, encoding) {
-    logger.info(message)
-  }
-}

@@ -5,7 +5,7 @@ async function handleError (ctx, next) {
     ctx.body = 'Welcome'
     await next()
   } catch (err) {
-    ctx.status = err.status || err.code
+    ctx.status = err.status || err.code || 500
     if (err instanceof AppError) {
       ctx.body = {
         success: !1,

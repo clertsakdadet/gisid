@@ -17,11 +17,23 @@ const config = {
     }
   },
   logs: {
-    serviceLogConfig: {
-      filename: './logs/all.log',
+    requestLogConfig: {
+      filename: './logs/req.log',
       datePattern: '/yyyy-MM/dd-',
       prepend: true,
       level: process.env.ENV === 'development' ? 'debug' : 'info',
+      handleExceptions: true,
+      json: true,
+      maxsize: 5242880, // 5MB
+      maxFiles: 5,
+      createTree: true,
+      colorize: false
+    },
+    accountErrorLogConfig: {
+      filename: './logs/acc.log',
+      datePattern: '/yyyy-MM/dd-',
+      prepend: true,
+      level: 'error',
       handleExceptions: true,
       json: true,
       maxsize: 5242880, // 5MB
@@ -52,8 +64,8 @@ config.getEmailConfirmURL = function () {
   return 'https://' + this.app.host + this.api.accountAPI.prefix + this.api.accountAPI.confirmEmail
 }
 
-config.getServiceLogConfig = function () {
-  return this.logs.serviceLogConfig
+config.getLogConfig = function (name) {
+  return this.logs[name]
 }
 
 config.getServiceConfig = function (name) {

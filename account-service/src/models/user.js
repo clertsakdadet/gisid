@@ -2,6 +2,7 @@
 const bcrypt = require('bcrypt')
 const AppError = require('../utils/errors/appError')
 const errorCode = require('../config/msgConfig.json')
+const logger = require('../utils/logger/account_log')
 
 module.exports = (sequelize, DataTypes) => {
   const _columns = {
@@ -20,10 +21,17 @@ module.exports = (sequelize, DataTypes) => {
       validate: {
         notEmpty: true,
         isAlphanumeric: true,
-        len: [4, 50]
+        len: [4, 200]
       },
       set (val) {
         this.setDataValue('username', val.toLowerCase())
+      }
+    },
+    password: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        notEmpty: true
       }
     },
     email: {
@@ -94,17 +102,19 @@ module.exports = (sequelize, DataTypes) => {
 
   const User = sequelize.define('User', _columns)
 
-  User.encryptPassword = async function (password, cb) {
+  User.encryptPassword = async function (password) {
     if (!password) {
-      cb(new Error('Password is required.'), null)
-      return
+      throw new AppError('Password is required.', errorCode.unprocessableEntity)
     }
-
     try {
       let hash = await bcrypt.hash(password, 10)
-      cb(null, hash)
+      if (!hash) {
+        throw new AppError('Unable to hash password.')
+      } else {
+        return hash
+      }
     } catch (err) {
-      cb(new Error('Unable to hash password'), null)
+      throw err
     }
   }
 
@@ -129,9 +139,11 @@ module.exports = (sequelize, DataTypes) => {
         throw new AppError('Username \'' + user.username + '\' isn\'t available.', errorCode.DataAlreadyExists)
       }
 
+      let encryptPassword = await User.encryptPassword(user.password)
+
       let createdUser = await User.create({
         username: user.username,
-        password: user.password,
+        password: encryptPassword,
         email: user.email,
         profile: {
           fullname: user.fullname
@@ -144,51 +156,12 @@ module.exports = (sequelize, DataTypes) => {
         return createdUser
       }
     } catch (err) {
-      // for log error here
+      if (!(err instanceof AppError) && err.message) {
+        logger.error(err)
+      }
       throw err
     }
   }
-
-  // User.createUser = async function (ctx, user, code) {
-  //   let msg = ''
-  //   let emailExist = await User.findUserByEmail(user.email)
-  //   if (emailExist) {
-  //     msg = 'The email address you have entered is already registered.'
-  //     if (ctx) {
-  //       ctx.throw(code.unprocessableEntity || 422, msg)
-  //     } else throw new Error(msg)
-  //   }
-  //   let usernameExist = await User.findUserByUsername(user.username)
-  //   if (usernameExist) {
-  //     msg = 'Username \'' + user.username + '\' isn\'t available.'
-  //     if (ctx) {
-  //       ctx.throw(code.unprocessableEntity || 422, msg)
-  //     } else throw new Error(msg)
-  //   }
-
-  //   let createdUser = await User.create({
-  //     username: user.username,
-  //     password: user.password,
-  //     email: user.email,
-  //     profile: {
-  //       fullname: user.fullname
-  //     }
-  //   })
-
-  //   if (!createdUser) {
-  //     msg = 'Unable to create new User Account.'
-  //     if (ctx) {
-  //       ctx.throw(code.unprocessableEntity || 422, msg)
-  //     } else throw new Error(msg)
-  //   } else {
-  //     if (ctx) {
-  //       ctx.body = {
-  //         success: !0,
-  //         message: 'Check your inbox We just emailed a confirmation link to ' + user.email + '. Click the link to complete your account set-up.'
-  //       }
-  //     } else return createdUser
-  //   }
-  // }
 
   return User
 }
