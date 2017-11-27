@@ -6,20 +6,13 @@ const config = {
   },
   mail: {
     confirmEmailUrl: '/authenticate-email',
-    gmailConfig: {
-      service: 'gmail',
-      auth: {
-        user: process.env.GMAIL_ACC || 'noreplygisid@gmail.com',
-        pass: process.env.GMAIL_PW || 'P@ssw0rdgisid'
-      }
-    },
     SMTPConfig: {
       host: 'smtp.ethereal.email',
       port: 587,
       secure: false, // true for 465, false for other ports
       auth: {
-        user: process.env.SMPT_ACC || 'test@test.com',
-        pass: process.env.SMPT_PW || 'test'
+        user: process.env.SMPT_ACC || 'sxneepjzd23gupay@ethereal.email',
+        pass: process.env.SMPT_PW || 'z4JVy8szbyTmCP4bwM'
       }
     }
   },

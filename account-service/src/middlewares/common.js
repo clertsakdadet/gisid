@@ -1,12 +1,22 @@
+const AppError = require('../utils/errors/appError')
+
 async function handleError (ctx, next) {
   try {
+    ctx.body = 'Welcome'
     await next()
   } catch (err) {
     ctx.status = err.status || err.code
-    ctx.body = {
-      success: false,
-      message: err.message,
-      errors: err.causes
+    if (err instanceof AppError) {
+      ctx.body = {
+        success: !1,
+        message: err.message,
+        errors: err.causes
+      }
+    } else {
+      ctx.body = {
+        success: !1,
+        message: 'Oops! Something went wrong. please try again later.'
+      }
     }
   }
 }

@@ -5,14 +5,7 @@ const config = require('../config/appConfig')
 
 let mailConfig
 
-if (process.env.MAIL_TYPE === 'SMTP') {
-  mailConfig = config.getMailConfig('SMTPConfig')
-  winston.log('info', 'Using SMTP Mail Server.')
-} else {
-  mailConfig = config.getMailConfig('gmailConfig')
-  winston.log('info', 'Using GMAIL Mail Server.')
-}
-
+mailConfig = config.getMailConfig('SMTPConfig')
 const mailTransporter = nodemailer.createTransport(mailConfig)
 
 const sentEmail = async (_from, _to, _subject, _text) => {

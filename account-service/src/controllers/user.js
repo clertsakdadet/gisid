@@ -1,5 +1,6 @@
 const models = require('../models')
 const errorCode = require('../config/msgConfig.json')
+const AppError = require('../utils/errors/appError')
 
 const signUp = async (ctx, _next) => {
   const body = ctx.request.body
@@ -12,9 +13,18 @@ const signUp = async (ctx, _next) => {
   ctx.checkBody('email').isEmail('Please enter a valid email address.')
 
   if (ctx.errors) {
-    ctx.throw(errorCode.unprocessableEntity, {message: 'Validation Failed.', causes: ctx.errors})
+    throw new AppError('Validation Failed.', errorCode.unprocessableEntity, ctx.errors)
+    // ctx.throw(errorCode.unprocessableEntity, {message: 'Validation Failed.', causes: ctx.errors})
   } else {
-    await models.User.createUser(ctx, body, errorCode.unprocessableEntity)
+    try {
+      await models.User.createUser(body)
+      ctx.body = {
+        success: !0,
+        message: 'Check your inbox We just emailed a confirmation link to ' + body.email + '. Click the link to complete your account set-up.'
+      }
+    } catch (err) {
+      throw err
+    }
   }
 }
 

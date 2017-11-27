@@ -1,3 +1,4 @@
 {
-  "unprocessableEntity": 422
+  "unprocessableEntity": 422,
+  "DataAlreadyExists": 409
 }

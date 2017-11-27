@@ -1,5 +1,7 @@
 'use strict'
 const bcrypt = require('bcrypt')
+const AppError = require('../utils/errors/appError')
+const errorCode = require('../config/msgConfig.json')
 
 module.exports = (sequelize, DataTypes) => {
   const _columns = {
@@ -116,46 +118,77 @@ module.exports = (sequelize, DataTypes) => {
     return user
   }
 
-  User.createUser = async function (ctx, user, code) {
-    let msg = ''
-    let emailExist = await User.findUserByEmail(user.email)
-    if (emailExist) {
-      msg = 'The email address you have entered is already registered.'
-      if (ctx) {
-        ctx.throw(code.unprocessableEntity || 422, msg)
-      } else throw new Error(msg)
-    }
-    let usernameExist = await User.findUserByUsername(user.username)
-    if (usernameExist) {
-      msg = 'Username \'' + user.username + '\' isn\'t available.'
-      if (ctx) {
-        ctx.throw(code.unprocessableEntity || 422, msg)
-      } else throw new Error(msg)
-    }
-
-    let createdUser = await User.create({
-      username: user.username,
-      password: user.password,
-      email: user.email,
-      profile: {
-        fullname: user.fullname
+  User.createUser = async function (user) {
+    try {
+      let emailExist = await User.findUserByEmail(user.email)
+      if (emailExist) {
+        throw new AppError('The email address you have entered is already registered.', errorCode.DataAlreadyExists)
       }
-    })
+      let usernameExist = await User.findUserByUsername(user.username)
+      if (usernameExist) {
+        throw new AppError('Username \'' + user.username + '\' isn\'t available.', errorCode.DataAlreadyExists)
+      }
 
-    if (!createdUser) {
-      msg = 'Unable to create new User Account.'
-      if (ctx) {
-        ctx.throw(code.unprocessableEntity || 422, msg)
-      } else throw new Error(msg)
-    } else {
-      if (ctx) {
-        ctx.body = {
-          success: !0,
-          message: 'Check your inbox We just emailed a confirmation link to ' + user.email + '. Click the link to complete your account set-up.'
+      let createdUser = await User.create({
+        username: user.username,
+        password: user.password,
+        email: user.email,
+        profile: {
+          fullname: user.fullname
         }
-      } else return createdUser
+      })
+
+      if (!createdUser) {
+        throw new AppError('Unable to create new User Account.')
+      } else {
+        return createdUser
+      }
+    } catch (err) {
+      // for log error here
+      throw err
     }
   }
+
+  // User.createUser = async function (ctx, user, code) {
+  //   let msg = ''
+  //   let emailExist = await User.findUserByEmail(user.email)
+  //   if (emailExist) {
+  //     msg = 'The email address you have entered is already registered.'
+  //     if (ctx) {
+  //       ctx.throw(code.unprocessableEntity || 422, msg)
+  //     } else throw new Error(msg)
+  //   }
+  //   let usernameExist = await User.findUserByUsername(user.username)
+  //   if (usernameExist) {
+  //     msg = 'Username \'' + user.username + '\' isn\'t available.'
+  //     if (ctx) {
+  //       ctx.throw(code.unprocessableEntity || 422, msg)
+  //     } else throw new Error(msg)
+  //   }
+
+  //   let createdUser = await User.create({
+  //     username: user.username,
+  //     password: user.password,
+  //     email: user.email,
+  //     profile: {
+  //       fullname: user.fullname
+  //     }
+  //   })
+
+  //   if (!createdUser) {
+  //     msg = 'Unable to create new User Account.'
+  //     if (ctx) {
+  //       ctx.throw(code.unprocessableEntity || 422, msg)
+  //     } else throw new Error(msg)
+  //   } else {
+  //     if (ctx) {
+  //       ctx.body = {
+  //         success: !0,
+  //         message: 'Check your inbox We just emailed a confirmation link to ' + user.email + '. Click the link to complete your account set-up.'
+  //       }
+  //     } else return createdUser
+  //   }
+  // }
 
   return User
 }
