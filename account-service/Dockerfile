@@ -23,4 +23,4 @@ EXPOSE 3001
 # Run our app.
 #CMD [ "npm", "start" ]
 
-RUN ["chmod", "+x", "wait-for]
+RUN ["chmod", "+x", "wait-for"]
