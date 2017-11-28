@@ -12,6 +12,7 @@ services:
      - DB_HOSTNAME=acc-db
      - DB_PORT=5432
      - HOSTNAME=gisid.cdg.co.th
+     - SMPT_HOST=mailgateway.cdg.co.th
   acc-db:
     build: ./account-db
     container_name: "acc-postgres-db"

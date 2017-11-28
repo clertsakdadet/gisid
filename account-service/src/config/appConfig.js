@@ -9,7 +9,7 @@ const config = {
     confirmTokenValidFor: 15, // minutes
     senderEmail: 'support@cdg.co.th',
     SMTPConfig: {
-      host: process.env.SMPT_HOST || 'mailgateway.cdg.co.th' || 'smtp.ethereal.email',
+      host: process.env.SMPT_HOST || 'mailgateway.cdg.co.th',
       port: 25,
       secure: false
     },
