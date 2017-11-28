@@ -63,7 +63,7 @@ config.getPort = function () {
 }
 
 config.getMailConfig = function () {
-  return process.env.ENV === 'production' ? this.mail.SMTPConfig : this.mail.SMTPConfigDev
+  return process.env.NODE_ENV === 'production' ? this.mail.SMTPConfig : this.mail.SMTPConfigDev
 }
 
 config.getEmailConfirmURL = function () {
