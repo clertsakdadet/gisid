@@ -13,7 +13,7 @@ const config = {
       port: 25,
       secure: false,
       tls: {
-        rejectUnauthorized: false
+        rejectUnauthorized: false // ignore self sign cert
       }
     },
     SMTPConfigDev: {
