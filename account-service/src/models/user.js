@@ -194,5 +194,37 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
 
+  User.activeEmail = async function (token) {
+    try {
+      let tokenValid = await User.findOne({
+        where: {
+          tokenEmailConfirm: token,
+          tokenEmailConfirmExpire: { $gt: new Date() }
+        },
+        attributes: ['id', 'email', 'isEmailConfirmed']
+      })
+      if (!tokenValid) {
+        throw new AppError('Token is invalid or expired.', errorCode.unprocessableEntity)
+      }
+      if (tokenValid.get('isEmailConfirmed')) {
+        throw new AppError('The Email address is already verified.', errorCode.unprocessableEntity)
+      }
+      let active = await tokenValid.update({
+        isEmailConfirmed: true,
+        tokenEmailConfirm: null
+      })
+      if (!active) {
+        throw new AppError('Unable to active email adress.')
+      } else {
+        return tokenValid.get('email')
+      }
+    } catch (err) {
+      if (!(err instanceof AppError) && err.message) {
+        logger.error(err)
+      }
+      throw err
+    }
+  }
+
   return User
 }

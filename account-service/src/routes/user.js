@@ -9,4 +9,6 @@ const router = Router({
 
 router.post(accountAPIConfig.signUp, users.signUp)
 
+router.get(accountAPIConfig.confirmEmail, users.confirmEmail)
+
 module.exports = router

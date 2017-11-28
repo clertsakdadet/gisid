@@ -56,7 +56,7 @@ const config = {
     accountAPI: {
       prefix: '/g/account',
       signUp: '/signup',
-      confirmEmail: '/confirm-email'
+      confirmEmail: '/confirm-email/:token'
     }
   }
 }
@@ -66,13 +66,12 @@ config.getPort = function () {
 }
 
 config.getMailConfig = function () {
-  console.log('NODE_ENV', process.env)
   return process.env.NODE_ENV === 'production' ? this.mail.SMTPConfig : this.mail.SMTPConfigDev
 }
 
 config.getEmailConfirmURL = function () {
   // https://gisid.co.th/g/account/confirm-email?token=dcaddf644369
-  return 'https://' + this.app.host + this.api.accountAPI.prefix + this.api.accountAPI.confirmEmail
+  return 'https://' + this.app.host + this.api.accountAPI.prefix + this.api.accountAPI.confirmEmail.replace(':token', '')
 }
 
 config.getLogConfig = function (name) {
