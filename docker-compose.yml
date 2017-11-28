@@ -11,6 +11,7 @@ services:
     environment:
      - DB_HOSTNAME=acc-db
      - DB_PORT=5432
+     - HOSTNAME=gisid.cdg.co.th
   acc-db:
     build: ./account-db
     container_name: "acc-postgres-db"
@@ -25,6 +26,6 @@ services:
     links:
      - acc-service
     ports:
-      - 80:80
+      - 81:80
 volumes:
   acc-db-data:

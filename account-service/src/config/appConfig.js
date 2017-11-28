@@ -6,13 +6,20 @@ const config = {
   },
   mail: {
     confirmEmailUrl: '/authenticate-email',
+    confirmTokenValidFor: 15, // minutes
+    senderEmail: 'support@cdg.co.th',
     SMTPConfig: {
+      host: process.env.SMPT_HOST || 'mailgateway.cdg.co.th' || 'smtp.ethereal.email',
+      port: 25,
+      secure: false
+    },
+    SMTPConfigDev: {
       host: 'smtp.ethereal.email',
       port: 587,
-      secure: false, // true for 465, false for other ports
+      secure: false,
       auth: {
-        user: process.env.SMPT_ACC || 'sxneepjzd23gupay@ethereal.email',
-        pass: process.env.SMPT_PW || 'z4JVy8szbyTmCP4bwM'
+        user: 'sxneepjzd23gupay@ethereal.email',
+        pass: 'z4JVy8szbyTmCP4bwM'
       }
     }
   },
@@ -55,8 +62,8 @@ config.getPort = function () {
   return this.app.port
 }
 
-config.getMailConfig = function (type) {
-  return this.mail[type]
+config.getMailConfig = function () {
+  return process.env.ENV === 'production' ? this.mail.SMTPConfig : this.mail.SMTPConfigDev
 }
 
 config.getEmailConfirmURL = function () {

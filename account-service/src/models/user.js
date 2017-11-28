@@ -3,6 +3,9 @@ const bcrypt = require('bcryptjs')
 const AppError = require('../utils/errors/appError')
 const errorCode = require('../config/msgConfig.json')
 const logger = require('../utils/logger/account_log')
+const crypto = require('crypto-promise')
+const config = require('../config/appConfig')
+const minute = 60000
 
 module.exports = (sequelize, DataTypes) => {
   const _columns = {
@@ -54,11 +57,15 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       unique: true
     },
+    resetPasswordToken: {
+      type: DataTypes.STRING,
+      set (val) {
+        this.setDataValue('resetPasswordToken', val)
+        this.setDataValue('resetPasswordExpire', Date.now())
+      }
+    },
     resetPasswordExpire: {
       type: DataTypes.DATE
-    },
-    resetPasswordToken: {
-      type: DataTypes.STRING
     },
     wrongPasswordCount: {
       type: DataTypes.INTEGER,
@@ -73,7 +80,11 @@ module.exports = (sequelize, DataTypes) => {
       defaultValue: false
     },
     tokenEmailConfirm: {
-      type: DataTypes.STRING
+      type: DataTypes.STRING,
+      set (val) {
+        this.setDataValue('tokenEmailConfirm', val)
+        this.setDataValue('tokenEmailConfirmExpire', val ? (Date.now() + config.mail.confirmTokenValidFor * minute) : null)
+      }
     },
     tokenEmailConfirmExpire: {
       type: DataTypes.DATE
@@ -102,22 +113,39 @@ module.exports = (sequelize, DataTypes) => {
 
   const User = sequelize.define('User', _columns)
 
+  User.prototype.getValidConfirmEmailToken = async function () {
+    try {
+      if (!(this.tokenEmailConfirm && this.tokenEmailConfirmExpire > Date.now())) {
+        let rand = await crypto.randomBytes(12)
+        let token = rand.toString('hex')
+        await this.update({
+          tokenEmailConfirm: token
+        })
+      }
+      return this.tokenEmailConfirm
+    } catch (err) {
+      if (!(err instanceof AppError) && err.message) {
+        logger.error(err)
+      }
+      throw err
+    }
+  }
+
   User.encryptPassword = async function (password) {
     if (!password) {
       throw new AppError('Password is required.', errorCode.unprocessableEntity)
     }
     try {
       let hash = await bcrypt.hash(password, 10)
-      logger.info('Start encryptPassword5')
       if (!hash) {
-        logger.info('Start encryptPassword6')
         throw new AppError('Unable to hash password.')
       } else {
-        logger.info('Start encryptPassword7')
         return hash
       }
     } catch (err) {
-      logger.info('Start encryptPassword8')
+      if (!(err instanceof AppError) && err.message) {
+        logger.error(err)
+      }
       throw err
     }
   }
@@ -143,10 +171,7 @@ module.exports = (sequelize, DataTypes) => {
         throw new AppError('Username \'' + user.username + '\' isn\'t available.', errorCode.DataAlreadyExists)
       }
 
-      logger.info('Start encryptPassword')
       let encryptPassword = await User.encryptPassword(user.password)
-
-      logger.info('Start createdUser')
       let createdUser = await User.create({
         username: user.username,
         password: encryptPassword,
@@ -155,7 +180,6 @@ module.exports = (sequelize, DataTypes) => {
           fullname: user.fullname
         }
       })
-      logger.info('Done')
 
       if (!createdUser) {
         throw new AppError('Unable to create new User Account.')

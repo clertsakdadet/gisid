@@ -1,4 +1,5 @@
 'use strict'
+
 module.exports = {
   up: (queryInterface, Sequelize) => {
     return queryInterface.createTable('Users', {
@@ -13,34 +14,16 @@ module.exports = {
       username: {
         type: Sequelize.STRING,
         allowNull: false,
-        unique: true,
-        validate: {
-          notEmpty: true,
-          isAlphanumeric: true,
-          len: [4, 50]
-        },
-        set (val) {
-          this.setDataValue('username', val.toLowerCase())
-        }
+        unique: true
       },
       password: {
         type: Sequelize.STRING,
-        allowNull: false,
-        validate: {
-          notEmpty: true
-        }
+        allowNull: false
       },
       email: {
         type: Sequelize.STRING,
         unique: true,
-        allowNull: false,
-        validate: {
-          notEmpty: true,
-          isEmail: true
-        },
-        set (val) {
-          this.setDataValue('email', val.toLowerCase())
-        }
+        allowNull: false
       },
       googleId: {
         type: Sequelize.STRING,
@@ -50,11 +33,11 @@ module.exports = {
         type: Sequelize.STRING,
         unique: true
       },
-      resetPasswordExpire: {
-        type: Sequelize.DATE
-      },
       resetPasswordToken: {
         type: Sequelize.STRING
+      },
+      resetPasswordExpire: {
+        type: Sequelize.DATE
       },
       wrongPasswordCount: {
         type: Sequelize.INTEGER,

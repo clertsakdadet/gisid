@@ -1,11 +1,9 @@
 const nodemailer = require('nodemailer')
-const winston = require('winston')
-const crypto = require('crypto-promise')
+const logger = require('../utils/logger/account_log')
 const config = require('../config/appConfig')
+const AppError = require('../utils/errors/appError')
 
-let mailConfig
-
-mailConfig = config.getMailConfig('SMTPConfig')
+const mailConfig = config.getMailConfig()
 const mailTransporter = nodemailer.createTransport(mailConfig)
 
 const sentEmail = async (_from, _to, _subject, _text) => {
@@ -18,20 +16,21 @@ const sentEmail = async (_from, _to, _subject, _text) => {
     })
     return success
   } catch (err) {
-    return new Error('Unable to send an email.')
+    if (err.message) {
+      logger.error(err)
+    }
+    throw new AppError('Unable to send an email.')
   }
 }
 
-const sentConfirmEmail = async (email) => {
-  let rand = await crypto.randomBytes(12)
-  let token = rand.toString('hex')
+const sentConfirmEmail = async (email, token) => {
   let emailConfirmUrl = config.getEmailConfirmURL()
   let subject = 'Email address confirmation'
-  let text = 'Click the link below to confirm your email and finish creating your Medium account.\n\n\n\n' +
-  'This link will expire in 15 minutes and can only be used once.\n\n' +
+  let text = 'Click the link below to confirm your email and finish creating your account.\n\n\n\n' +
+  'This link will expire in ' + config.mail.confirmTokenValidFor + ' minutes and can only be used once.\n\n' +
   emailConfirmUrl + '?token=' + token + '\n\n'
 
-  let res = await sentEmail(mailConfig.auth.user, email, subject, text)
+  let res = await sentEmail(config.mail.senderEmail, email, subject, text)
   return res
 }
 
