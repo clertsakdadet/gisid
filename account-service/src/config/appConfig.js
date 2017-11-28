@@ -11,7 +11,10 @@ const config = {
     SMTPConfig: {
       host: process.env.SMPT_HOST || 'mailgateway.cdg.co.th',
       port: 25,
-      secure: false
+      secure: false,
+      tls: {
+        rejectUnauthorized: false
+      }
     },
     SMTPConfigDev: {
       host: 'smtp.ethereal.email',
