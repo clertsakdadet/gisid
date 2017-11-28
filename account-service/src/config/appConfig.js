@@ -63,6 +63,7 @@ config.getPort = function () {
 }
 
 config.getMailConfig = function () {
+  console.log('NODE_ENV', process.env)
   return process.env.NODE_ENV === 'production' ? this.mail.SMTPConfig : this.mail.SMTPConfigDev
 }
 
