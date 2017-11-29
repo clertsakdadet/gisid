@@ -10,7 +10,8 @@ const config = {
       signUp: '/signup',
       forget: '/forget',
       delete: '/delete',
-      changePassword: '/password',
+      updatePassword: '/update-password',
+      resetPassword: '/reset-password',
       deleteAccount: '/remove',
       confirmEmail: '/confirm-email/:token',
       confirmResetPassword: '/confirm-password-reset/:token'

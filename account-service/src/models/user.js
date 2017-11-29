@@ -101,7 +101,11 @@ module.exports = (sequelize, DataTypes) => {
     },
     inActived: { // Deleting account
       type: DataTypes.BOOLEAN,
-      defaultValue: false
+      defaultValue: false,
+      set (val) {
+        this.setDataValue('inActived', val)
+        this.setDataValue('inActivedAt', val ? Date.now() : null)
+      }
     },
     inActivedAt: {
       type: DataTypes.DATE

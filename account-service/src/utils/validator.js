@@ -13,6 +13,12 @@ function validatePassword (ctx, isGet) {
   chk.len(6, 20, 'Password must be at least 4 characters.')
 }
 
+function validateCurrentPassword (ctx, isGet) {
+  let field = 'current_password'
+  let chk = isGet ? ctx.checkParams(field) : ctx.checkBody(field)
+  chk.notEmpty('Current password is required.')
+}
+
 function validateConfirmPassword (ctx, password, isGet) {
   let field = 'confirm_password'
   let chk = isGet ? ctx.checkParams(field) : ctx.checkBody(field)
@@ -41,6 +47,7 @@ module.exports = {
   validateUsername,
   validatePassword,
   validateConfirmPassword,
+  validateCurrentPassword,
   validateEmail,
   validateFullname,
   validateToken
