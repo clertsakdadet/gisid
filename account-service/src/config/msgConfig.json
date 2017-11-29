@@ -1,4 +1,5 @@
 {
-  "unprocessableEntity": 422,
-  "DataAlreadyExists": 409
+  "UnprocessableEntity": 422,
+  "DataAlreadyExists": 409,
+  "InternalServerError": 500
 }

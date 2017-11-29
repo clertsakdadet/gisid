@@ -5,6 +5,7 @@ const errorCode = require('../config/msgConfig.json')
 const logger = require('../utils/logger/account_log')
 const crypto = require('crypto-promise')
 const config = require('../config/appConfig')
+const utils = require('../utils/utils')
 const minute = 60000
 
 module.exports = (sequelize, DataTypes) => {
@@ -16,6 +17,11 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER
     },
     profile: DataTypes.JSON,
+    /*
+    profile: {
+      fullname: 'John Wick'
+    }
+    */
     tokens: DataTypes.JSON,
     username: {
       type: DataTypes.STRING,
@@ -61,7 +67,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       set (val) {
         this.setDataValue('resetPasswordToken', val)
-        this.setDataValue('resetPasswordExpire', Date.now())
+        this.setDataValue('resetPasswordExpire', val ? (Date.now() + config.mail.passwordTokenValidFor * minute) : null)
       }
     },
     resetPasswordExpire: {
@@ -83,7 +89,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       set (val) {
         this.setDataValue('tokenEmailConfirm', val)
-        this.setDataValue('tokenEmailConfirmExpire', val ? (Date.now() + config.mail.confirmTokenValidFor * minute) : null)
+        this.setDataValue('tokenEmailConfirmExpire', val ? (Date.now() + config.mail.emailTokenValidFor * minute) : null)
       }
     },
     tokenEmailConfirmExpire: {
@@ -113,10 +119,12 @@ module.exports = (sequelize, DataTypes) => {
 
   const User = sequelize.define('User', _columns)
 
+  // Instance Method
   User.prototype.getValidConfirmEmailToken = async function () {
     try {
       if (!(this.tokenEmailConfirm && this.tokenEmailConfirmExpire > Date.now())) {
-        let rand = await crypto.randomBytes(12)
+        let randLength = utils.getRandomIntInclusive(1, 4)
+        let rand = await crypto.randomBytes(36 - randLength)
         let token = rand.toString('hex')
         await this.update({
           tokenEmailConfirm: token
@@ -131,9 +139,41 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
 
+  User.prototype.getValidResetPasswordToken = async function (renew) {
+    try {
+      if (renew || !(this.resetPasswordToken && this.resetPasswordExpire > Date.now())) {
+        let randLength = utils.getRandomIntInclusive(1, 4)
+        let rand = await crypto.randomBytes(36 - randLength)
+        let token = rand.toString('hex')
+        await this.update({
+          resetPasswordToken: token
+        })
+      }
+      return this.resetPasswordToken
+    } catch (err) {
+      if (!(err instanceof AppError) && err.message) {
+        logger.error(err)
+      }
+      throw err
+    }
+  }
+
+  User.prototype.getFullName = function () {
+    let profile = this.get('profile')
+    return profile ? profile.fullname : ''
+  }
+
+  User.prototype.isInvalidate = function (ignoreEmail, ignoreDelete, ignoreLock) {
+    if (!ignoreEmail && !this.isEmailConfirmed) return 'This account not yet confirmed your email address.'
+    if (!ignoreDelete && this.inActived) return 'This account has been deactivated.'
+    if (!ignoreLock && this.locked) return 'This account is now locked.'
+    return ''
+  }
+
+  // Class Method
   User.encryptPassword = async function (password) {
     if (!password) {
-      throw new AppError('Password is required.', errorCode.unprocessableEntity)
+      throw new AppError('Password is required.', errorCode.UnprocessableEntity)
     }
     try {
       let hash = await bcrypt.hash(password, 10)
@@ -158,6 +198,18 @@ module.exports = (sequelize, DataTypes) => {
   User.findUserByUsername = async function (_username) {
     let user = await User.findOne({ where: {username: _username}, attributes: ['id'] })
     return user
+  }
+
+  User.findValidOne = async function (options) {
+    if (options && options.attributes && options.attributes instanceof Array) {
+      let attr = options.attributes
+      if (!attr.includes('id')) attr.push('id')
+      if (!attr.includes('isEmailConfirmed')) attr.push('isEmailConfirmed')
+      if (!attr.includes('inActived')) attr.push('inActived')
+      if (!attr.includes('locked')) attr.push('locked')
+    }
+    let res = await User.findOne(options)
+    return res
   }
 
   User.createUser = async function (user) {
@@ -204,10 +256,10 @@ module.exports = (sequelize, DataTypes) => {
         attributes: ['id', 'email', 'isEmailConfirmed']
       })
       if (!tokenValid) {
-        throw new AppError('Token is invalid or expired.', errorCode.unprocessableEntity)
+        throw new AppError('Token is invalid or expired.', errorCode.UnprocessableEntity)
       }
       if (tokenValid.get('isEmailConfirmed')) {
-        throw new AppError('The Email address is already verified.', errorCode.unprocessableEntity)
+        throw new AppError('The Email address is already verified.', errorCode.UnprocessableEntity)
       }
       let active = await tokenValid.update({
         isEmailConfirmed: true,

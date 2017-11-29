@@ -4,9 +4,22 @@ const config = {
     port: process.env.PORT || 3000,
     name: process.env.APP_NAME || 'account service'
   },
+  api: {
+    accountAPI: {
+      prefix: '/g/account',
+      signUp: '/signup',
+      forget: '/forget',
+      changePassword: '/password',
+      deleteAccount: '/remove',
+      confirmEmail: '/confirm-email/:token',
+      confirmResetPassword: '/confirm-password-reset/:token',
+      confirmDeleteAccount: '/confirm-account-delete/:token'
+    }
+  },
   mail: {
     confirmEmailUrl: '/authenticate-email',
-    confirmTokenValidFor: 15, // minutes
+    passwordTokenValidFor: 15, // minutes
+    emailTokenValidFor: 15, // minutes
     senderEmail: 'support@cdg.co.th',
     SMTPConfig: {
       host: process.env.SMPT_HOST || 'mailgateway.cdg.co.th',
@@ -51,13 +64,6 @@ const config = {
       createTree: true,
       colorize: false
     }
-  },
-  api: {
-    accountAPI: {
-      prefix: '/g/account',
-      signUp: '/signup',
-      confirmEmail: '/confirm-email/:token'
-    }
   }
 }
 
@@ -72,6 +78,11 @@ config.getMailConfig = function () {
 config.getEmailConfirmURL = function () {
   // https://gisid.co.th/g/account/confirm-email?token=dcaddf644369
   return 'https://' + this.app.host + this.api.accountAPI.prefix + this.api.accountAPI.confirmEmail.replace(':token', '')
+}
+
+config.getResetPasswordConfirmURL = function () {
+  // https://gisid.co.th/g/account/confirm-password-reset?token=dcaddf644369
+  return 'https://' + this.app.host + this.api.accountAPI.prefix + this.api.accountAPI.confirmResetPassword.replace(':token', '')
 }
 
 config.getLogConfig = function (name) {

@@ -1,11 +1,11 @@
 const AppError = require('../utils/errors/appError')
+const errorCode = require('../config/msgConfig.json')
 
 async function handleError (ctx, next) {
   try {
-    ctx.body = 'Welcome'
     await next()
   } catch (err) {
-    ctx.status = err.status || err.code || 500
+    ctx.status = err.status || err.code || errorCode.InternalServerError
     if (err instanceof AppError) {
       ctx.body = {
         success: !1,

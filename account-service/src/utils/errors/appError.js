@@ -1,3 +1,5 @@
+const errorCode = require('../../config/msgConfig.json')
+
 module.exports = class AppError extends Error {
   constructor (message, status, causes) {
     // Calling parent constructor of base Error class.
@@ -10,7 +12,7 @@ module.exports = class AppError extends Error {
     Error.captureStackTrace(this, this.constructor)
 
     // `500` is the default value if not specified.
-    this.status = status || 500
+    this.status = status || errorCode.InternalServerError
     this.causes = causes
   }
 }
