@@ -1,5 +1,6 @@
 const AppError = require('../utils/errors/appError')
 const errorCode = require('../config/msgConfig.json')
+const logger = require('../utils/logger/account_log')
 
 async function handleError (ctx, next) {
   try {
@@ -13,6 +14,9 @@ async function handleError (ctx, next) {
         errors: err.causes
       }
     } else {
+      if (err.message) {
+        logger.error(err)
+      }
       ctx.body = {
         success: !1,
         message: 'Oops! Something went wrong. please try again later.'

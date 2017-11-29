@@ -2,7 +2,6 @@
 const bcrypt = require('bcryptjs')
 const AppError = require('../utils/errors/appError')
 const errorCode = require('../config/msgConfig.json')
-const logger = require('../utils/logger/account_log')
 const crypto = require('crypto-promise')
 const config = require('../config/appConfig')
 const utils = require('../utils/utils')
@@ -120,6 +119,11 @@ module.exports = (sequelize, DataTypes) => {
   const User = sequelize.define('User', _columns)
 
   // Instance Method
+  User.prototype.getFullName = function () {
+    let profile = this.get('profile')
+    return profile ? profile.fullname : ''
+  }
+
   User.prototype.getValidConfirmEmailToken = async function () {
     try {
       if (!(this.tokenEmailConfirm && this.tokenEmailConfirmExpire > Date.now())) {
@@ -132,9 +136,6 @@ module.exports = (sequelize, DataTypes) => {
       }
       return this.tokenEmailConfirm
     } catch (err) {
-      if (!(err instanceof AppError) && err.message) {
-        logger.error(err)
-      }
       throw err
     }
   }
@@ -151,22 +152,14 @@ module.exports = (sequelize, DataTypes) => {
       }
       return this.resetPasswordToken
     } catch (err) {
-      if (!(err instanceof AppError) && err.message) {
-        logger.error(err)
-      }
       throw err
     }
   }
 
-  User.prototype.getFullName = function () {
-    let profile = this.get('profile')
-    return profile ? profile.fullname : ''
-  }
-
   User.prototype.isInvalidate = function (ignoreEmail, ignoreDelete, ignoreLock) {
-    if (!ignoreEmail && !this.isEmailConfirmed) return 'This account not yet confirmed your email address.'
     if (!ignoreDelete && this.inActived) return 'This account has been deactivated.'
     if (!ignoreLock && this.locked) return 'This account is now locked.'
+    if (!ignoreEmail && !this.isEmailConfirmed) return 'This account not yet confirmed your email address.'
     return ''
   }
 
@@ -183,9 +176,22 @@ module.exports = (sequelize, DataTypes) => {
         return hash
       }
     } catch (err) {
-      if (!(err instanceof AppError) && err.message) {
-        logger.error(err)
+      throw err
+    }
+  }
+
+  User.comparePassword = async function (password, hashPassword) {
+    if (!password && hashPassword) {
+      throw new AppError('Password is required.', errorCode.UnprocessableEntity)
+    }
+    try {
+      let compare = await bcrypt.compare(password, hashPassword)
+      if (!compare) {
+        throw new AppError('Password isn\'t match')
+      } else {
+        return compare
       }
+    } catch (err) {
       throw err
     }
   }
@@ -239,16 +245,13 @@ module.exports = (sequelize, DataTypes) => {
         return createdUser
       }
     } catch (err) {
-      if (!(err instanceof AppError) && err.message) {
-        logger.error(err)
-      }
       throw err
     }
   }
 
   User.activeEmail = async function (token) {
     try {
-      let tokenValid = await User.findOne({
+      let tokenValid = await User.findValidOne({
         where: {
           tokenEmailConfirm: token,
           tokenEmailConfirmExpire: { $gt: new Date() }
@@ -257,6 +260,10 @@ module.exports = (sequelize, DataTypes) => {
       })
       if (!tokenValid) {
         throw new AppError('Token is invalid or expired.', errorCode.UnprocessableEntity)
+      }
+      let isInvalidate = tokenValid.isInvalidate(true)
+      if (isInvalidate) {
+        throw new AppError(isInvalidate, errorCode.UnprocessableEntity)
       }
       if (tokenValid.get('isEmailConfirmed')) {
         throw new AppError('The Email address is already verified.', errorCode.UnprocessableEntity)
@@ -271,9 +278,6 @@ module.exports = (sequelize, DataTypes) => {
         return tokenValid.get('email')
       }
     } catch (err) {
-      if (!(err instanceof AppError) && err.message) {
-        logger.error(err)
-      }
       throw err
     }
   }

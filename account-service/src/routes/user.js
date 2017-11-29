@@ -10,9 +10,9 @@ const router = Router({
 router.post(accountAPIConfig.signUp, users.signUp)
 router.post(accountAPIConfig.changePassword, users.changePassword)
 router.post(accountAPIConfig.forget, users.forgetPassword)
+router.post(accountAPIConfig.delete, users.deleteAccount)
 
 router.get(accountAPIConfig.confirmEmail, users.confirmEmail)
 router.get(accountAPIConfig.confirmResetPassword, users.confirmPasswordReset)
-router.get(accountAPIConfig.confirmDeleteAccount, users.confirmPasswordReset)
 
 module.exports = router

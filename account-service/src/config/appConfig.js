@@ -9,11 +9,11 @@ const config = {
       prefix: '/g/account',
       signUp: '/signup',
       forget: '/forget',
+      delete: '/delete',
       changePassword: '/password',
       deleteAccount: '/remove',
       confirmEmail: '/confirm-email/:token',
-      confirmResetPassword: '/confirm-password-reset/:token',
-      confirmDeleteAccount: '/confirm-account-delete/:token'
+      confirmResetPassword: '/confirm-password-reset/:token'
     }
   },
   mail: {

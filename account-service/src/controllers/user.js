@@ -3,6 +3,7 @@ const errorCode = require('../config/msgConfig.json')
 const AppError = require('../utils/errors/appError')
 const mailer = require('./mailer')
 const validator = require('../utils/validator')
+const utils = require('../utils/utils')
 
 const confirmEmail = async (ctx, _next) => {
   const token = ctx.params.token
@@ -23,22 +24,6 @@ const confirmEmail = async (ctx, _next) => {
   }
 }
 
-function normalizeEmail (email) {
-  let rawParts = email.split('@')
-  let domain = rawParts.pop()
-  let user = rawParts.join('@')
-  let parts = [user, domain]
-  parts[1] = parts[1].toLowerCase()
-
-  // remove sub-address
-  parts[0] = parts[0].split('+')[0]
-  if (parts[1] === 'gmail.com' || parts[1] === 'googlemail.com') {
-    // Gmail ignores the dots
-    parts[0] = parts[0].replace(/\./g, '')
-  }
-  return parts.join('@')
-}
-
 const signUp = async (ctx, _next) => {
   const body = ctx.request.body
   validator.validateFullname(ctx)
@@ -50,7 +35,7 @@ const signUp = async (ctx, _next) => {
     throw new AppError('Validation Failed.', errorCode.UnprocessableEntity, ctx.errors)
   } else {
     try {
-      body.email = normalizeEmail(body.email)
+      body.email = utils.normalizeEmail(body.email)
       let user = await models.User.createUser(body)
       let token = await user.getValidConfirmEmailToken()
       mailer.sentConfirmEmail(user.get('email'), token)
@@ -72,7 +57,7 @@ const forgetPassword = async (ctx, _next) => {
     throw new AppError('Validation Failed.', errorCode.UnprocessableEntity, ctx.errors)
   } else {
     try {
-      body.email = normalizeEmail(body.email)
+      body.email = utils.normalizeEmail(body.email)
       let emailExist = await models.User.findValidOne({
         where: {
           email: body.email
@@ -156,7 +141,7 @@ const changePassword = async (ctx, _next) => {
         throw new AppError(isInvalidate, errorCode.UnprocessableEntity)
       }
       let encryptPassword = await models.User.encryptPassword(body.password)
-      tokenValid.update({ password: encryptPassword, resetPasswordToken: null })
+      await tokenValid.update({ password: encryptPassword, resetPasswordToken: null })
       ctx.body = {
         success: !0,
         message: 'Your password has been changed successfully! Thank you.'
@@ -167,8 +152,50 @@ const changePassword = async (ctx, _next) => {
   }
 }
 
+const deleteAccount = async (ctx, _next) => {
+  const body = ctx.request.body
+  validator.validateUsername(ctx)
+  validator.validatePassword(ctx)
+
+  if (ctx.errors) {
+    throw new AppError('Validation Failed.', errorCode.UnprocessableEntity, ctx.errors)
+  } else {
+    try {
+      let account = await models.User.findValidOne({
+        where: {
+          username: body.username
+        },
+        attributes: ['id', 'password']
+      })
+      if (!account) {
+        throw new AppError('This account is not exist', errorCode.UnprocessableEntity)
+      }
+      let isInvalidate = account.isInvalidate(true, false, true)
+      if (isInvalidate) {
+        throw new AppError(isInvalidate, errorCode.UnprocessableEntity)
+      }
+      let isMatch = await models.User.comparePassword(body.password, account.get('password'))
+      if (isMatch) {
+        await account.update({ inActived: !0 })
+        ctx.body = {
+          success: !0,
+          message: 'Your account has been successfully deleted'
+        }
+      } else {
+        ctx.body = {
+          success: !1,
+          message: 'Your password isn\'t match'
+        }
+      }
+    } catch (err) {
+      throw err
+    }
+  }
+}
+
 module.exports = {
   signUp,
+  deleteAccount,
   forgetPassword,
   changePassword,
   confirmEmail,
