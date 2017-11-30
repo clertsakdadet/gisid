@@ -11,8 +11,8 @@ module.exports = (sequelize, DataTypes) => {
   const _columns = {
     id: {
       allowNull: false,
-      autoIncrement: true,
       primaryKey: true,
+      autoIncrement: true,
       type: DataTypes.INTEGER
     },
     profile: DataTypes.JSON,
@@ -52,6 +52,15 @@ module.exports = (sequelize, DataTypes) => {
       },
       set (val) {
         this.setDataValue('email', val.toLowerCase())
+      }
+    },
+    reserve_email: {
+      type: DataTypes.STRING,
+      validate: {
+        isEmail: true
+      },
+      set (val) {
+        this.setDataValue('reserve_email', val ? val.toLowerCase() : null)
       }
     },
     googleId: {
@@ -128,16 +137,14 @@ module.exports = (sequelize, DataTypes) => {
     return profile ? profile.fullname : ''
   }
 
-  User.prototype.getValidConfirmEmailToken = async function () {
+  User.prototype.genValidConfirmEmailToken = async function () {
     try {
-      if (!(this.tokenEmailConfirm && this.tokenEmailConfirmExpire > Date.now())) {
-        let randLength = utils.getRandomIntInclusive(1, 4)
-        let rand = await crypto.randomBytes(36 - randLength)
-        let token = rand.toString('hex')
-        await this.update({
-          tokenEmailConfirm: token
-        })
-      }
+      let randLength = utils.getRandomIntInclusive(1, 4)
+      let rand = await crypto.randomBytes(36 - randLength)
+      let token = rand.toString('hex')
+      await this.update({
+        tokenEmailConfirm: token
+      })
       return this.tokenEmailConfirm
     } catch (err) {
       throw err
@@ -201,12 +208,12 @@ module.exports = (sequelize, DataTypes) => {
   }
 
   User.findUserByEmail = async function (_email) {
-    let user = await User.findOne({ where: {email: _email}, attributes: ['id'] })
+    let user = await User.findValidOne({ where: {email: _email}, attributes: ['id'] })
     return user
   }
 
   User.findUserByUsername = async function (_username) {
-    let user = await User.findOne({ where: {username: _username}, attributes: ['id'] })
+    let user = await User.findValidOne({ where: {username: _username}, attributes: ['id'] })
     return user
   }
 
@@ -260,7 +267,7 @@ module.exports = (sequelize, DataTypes) => {
           tokenEmailConfirm: token,
           tokenEmailConfirmExpire: { $gt: new Date() }
         },
-        attributes: ['id', 'email', 'isEmailConfirmed']
+        attributes: ['id', 'email', 'isEmailConfirmed', 'reserve_email']
       })
       if (!tokenValid) {
         throw new AppError('Token is invalid or expired.', errorCode.UnprocessableEntity)
@@ -269,18 +276,28 @@ module.exports = (sequelize, DataTypes) => {
       if (isInvalidate) {
         throw new AppError(isInvalidate, errorCode.UnprocessableEntity)
       }
-      if (tokenValid.get('isEmailConfirmed')) {
-        throw new AppError('The Email address is already verified.', errorCode.UnprocessableEntity)
+      let active
+      let reserveEmail = tokenValid.get('reserve_email')
+      if (reserveEmail) {
+        // case confirm email that user changed
+        active = await tokenValid.update({
+          email: reserveEmail,
+          reserve_email: null,
+          tokenEmailConfirm: null
+        })
+      } else {
+        if (tokenValid.get('isEmailConfirmed')) {
+          throw new AppError('The Email address is already verified.', errorCode.UnprocessableEntity)
+        }
+        active = await tokenValid.update({
+          isEmailConfirmed: !0,
+          tokenEmailConfirm: null
+        })
       }
-      let active = await tokenValid.update({
-        isEmailConfirmed: true,
-        tokenEmailConfirm: null
-      })
       if (!active) {
         throw new AppError('Unable to active email adress.')
-      } else {
-        return tokenValid.get('email')
       }
+      return tokenValid.get('email')
     } catch (err) {
       throw err
     }

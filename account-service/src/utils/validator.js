@@ -43,6 +43,12 @@ function validateToken (ctx, isGet) {
   chk.notEmpty('Token is required.')
 }
 
+function validateAccountID (ctx, isGet) {
+  let field = 'id'
+  let chk = isGet ? ctx.checkParams(field) : ctx.checkBody(field)
+  chk.isInt('id is invalid type').notEmpty('id is required.').toInt()
+}
+
 module.exports = {
   validateUsername,
   validatePassword,
@@ -50,5 +56,6 @@ module.exports = {
   validateCurrentPassword,
   validateEmail,
   validateFullname,
-  validateToken
+  validateToken,
+  validateAccountID
 }

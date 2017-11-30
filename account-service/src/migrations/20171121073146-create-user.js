@@ -5,8 +5,8 @@ module.exports = {
     return queryInterface.createTable('Users', {
       id: {
         allowNull: false,
-        autoIncrement: true,
         primaryKey: true,
+        autoIncrement: true,
         type: Sequelize.INTEGER
       },
       profile: Sequelize.JSON,
@@ -24,6 +24,9 @@ module.exports = {
         type: Sequelize.STRING,
         unique: true,
         allowNull: false
+      },
+      reserve_email: {
+        type: Sequelize.STRING
       },
       googleId: {
         type: Sequelize.STRING,

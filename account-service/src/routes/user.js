@@ -10,6 +10,7 @@ const router = Router({
 router.post(accountAPIConfig.signUp, users.signUp)
 router.post(accountAPIConfig.resetPassword, users.resetPassword)
 router.post(accountAPIConfig.updatePassword, users.updatePassword)
+router.post(accountAPIConfig.updateAccount, users.updateAccount)
 router.post(accountAPIConfig.forget, users.forgetPassword)
 router.post(accountAPIConfig.delete, users.deleteAccount)
 

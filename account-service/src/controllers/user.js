@@ -37,7 +37,7 @@ const signUp = async (ctx, _next) => {
     try {
       body.email = utils.normalizeEmail(body.email)
       let user = await models.User.createUser(body)
-      let token = await user.getValidConfirmEmailToken()
+      let token = await user.genValidConfirmEmailToken()
       mailer.sentConfirmEmail(user.get('email'), token)
       ctx.body = {
         success: !0,
@@ -229,12 +229,95 @@ const updatePassword = async (ctx, _next) => {
   }
 }
 
+const updateAccount = async (ctx, _next) => {
+  const body = ctx.request.body
+  validator.validateAccountID(ctx)
+  validator.validateUsername(ctx)
+  validator.validateEmail(ctx)
+  validator.validateFullname(ctx)
+  validator.validatePassword(ctx)
+
+  if (ctx.errors) {
+    throw new AppError('Validation Failed.', errorCode.UnprocessableEntity, ctx.errors)
+  } else {
+    try {
+      body.email = utils.normalizeEmail(body.email)
+      let account = await models.User.findValidOne({
+        where: {
+          id: body.id
+        },
+        attributes: ['id', 'email', 'profile', 'reserve_email', 'password']
+      })
+      if (!account) {
+        throw new AppError('This account doesn\'t exist', errorCode.UnprocessableEntity)
+      }
+      let isInvalidate = account.isInvalidate()
+      if (isInvalidate) {
+        throw new AppError(isInvalidate, errorCode.UnprocessableEntity)
+      }
+      let isMatch = await models.User.comparePassword(body.password, account.get('password'))
+      if (!isMatch) {
+        throw new AppError('Your password isn\'t match', errorCode.UnprocessableEntity)
+      }
+      let userExist = await models.User.findValidOne({
+        where: {
+          username: body.username
+        },
+        attributes: ['id']
+      })
+      if (userExist && userExist.get('id') !== body.id) {
+        throw new AppError('Username has already been taken.', errorCode.DataAlreadyExists)
+      }
+      let emailExist = await models.User.findValidOne({
+        where: {
+          email: body.email
+        },
+        attributes: ['id']
+      })
+      if (emailExist && emailExist.get('id') !== body.id) {
+        throw new AppError('Email has already been taken.', errorCode.DataAlreadyExists)
+      }
+      let _profile = account.get('profile')
+      if (!_profile) _profile = {}
+      _profile.fullname = body.fullname
+
+      if (account.get('email') === body.email) {
+        await account.update({
+          email: body.email,
+          username: body.username,
+          profile: _profile
+        })
+      } else {
+        // Case Email has been changed
+        await account.update({
+          reserve_email: body.email,
+          username: body.username,
+          profile: _profile
+        })
+        let token = await account.genValidConfirmEmailToken()
+        mailer.sentConfirmEmail(account.get('reserve_email'), token)
+        ctx.body = {
+          success: !0,
+          message: 'Check your inbox We just emailed a confirmation link to ' + body.email + '. Click the link to complete your account set-up.'
+        }
+      }
+      ctx.body = {
+        success: !0,
+        message: 'Check your inbox We just emailed a confirmation link to ' + body.email + '. Click the link to complete your account set-up.'
+      }
+    } catch (err) {
+      throw err
+    }
+  }
+}
+
 module.exports = {
   signUp,
   deleteAccount,
   forgetPassword,
   resetPassword,
   updatePassword,
+  updateAccount,
   confirmEmail,
   confirmPasswordReset
 }
