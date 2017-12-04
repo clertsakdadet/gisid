@@ -12,4 +12,4 @@ ENV POSTGRES_PASSWORD xYaXB3fDyUAN2hHnLJcj  <--- Change them
 Developing...
 
 # Project Information
-https://docs.google.com/document/d/1fU6HeOWl27Srjgn92YC-eLWZ4c2StPD_erHYJVDsZ4I/edit?usp=sharing
+https://goo.gl/kCmJKM
