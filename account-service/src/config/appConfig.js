@@ -1,6 +1,6 @@
 const config = {
   app: {
-    host: process.env.HOSTNAME || 'localhost',
+    host: process.env.HOSTNAME || 'dev.cdg.co.th',
     port: process.env.PORT || 3000,
     name: process.env.APP_NAME || 'account service'
   },
@@ -12,12 +12,28 @@ const config = {
       delete: '/delete',
       updateAccount: '/update',
       updatePassword: '/update-password',
+      createPassword: '/create-password',
       resetPassword: '/reset-password',
       deleteAccount: '/remove',
       confirmEmail: '/confirm-email/:token',
       confirmResetPassword: '/confirm-password-reset/:token',
       checkUserAvailable: '/username_available',
-      checkEmailAvailable: '/email_available'
+      checkEmailAvailable: '/email_available',
+      unlinkGoogle: '/unlink-google'
+    },
+    authenticateAPI: {
+      prefix: '/g/auth',
+      signIn: '/login',
+      signInWithGoogle: '/google',
+      googleCallback: '/google/callback',
+      confirmLinkGoogle: '/google/verify-password',
+      confirmLinkGooglePage: '/verify-with-password/google-oauth2/'
+    }
+  },
+  auth: {
+    googleAuth: {
+      clientID: process.env.GOOGLE_CLIENT_ID || '525584271682-l9q7af7ts8oimsa7oe9qtv3v6br5r4qf.apps.googleusercontent.com',
+      clientSecret: process.env.GOOGLE_CLIENT_SETCRET || 'fZRn86w5knk2wSPoDsJbFUW3'
     }
   },
   mail: {
@@ -82,6 +98,16 @@ config.getMailConfig = function () {
 config.getEmailConfirmURL = function () {
   // https://gisid.co.th/g/account/confirm-email?token=dcaddf644369
   return 'https://' + this.app.host + this.api.accountAPI.prefix + this.api.accountAPI.confirmEmail.replace(':token', '')
+}
+
+config.getPassportGoogleConfig = function () {
+  // callbackURL: https://gisid.co.th/g/auth/google/callback
+  return {
+    clientID: this.auth.googleAuth.clientID,
+    clientSecret: this.auth.googleAuth.clientSecret,
+    callbackURL: 'http://' + this.app.host + this.api.authenticateAPI.prefix + this.api.authenticateAPI.googleCallback,
+    passReqToCallback: true
+  }
 }
 
 config.getResetPasswordConfirmURL = function () {

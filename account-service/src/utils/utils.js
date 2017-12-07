@@ -6,6 +6,7 @@ function getRandomIntInclusive (min, max) {
 }
 
 function normalizeEmail (email) {
+  if (!email) return null
   let rawParts = email.split('@')
   let domain = rawParts.pop()
   let user = rawParts.join('@')

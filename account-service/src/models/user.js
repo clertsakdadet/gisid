@@ -5,6 +5,7 @@ const errorCode = require('../config/msgConfig.json')
 const crypto = require('crypto-promise')
 const config = require('../config/appConfig')
 const utils = require('../utils/utils')
+const validator = require('../utils/validator')
 const minute = 60000
 
 module.exports = (sequelize, DataTypes) => {
@@ -15,17 +16,19 @@ module.exports = (sequelize, DataTypes) => {
       autoIncrement: true,
       type: DataTypes.INTEGER
     },
+    uuid: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      defaultValue: DataTypes.UUIDV4
+    },
     profile: DataTypes.JSON,
     /*
     profile: {
       fullname: 'John Wick'
     }
     */
-    tokens: DataTypes.JSON,
     username: {
       type: DataTypes.STRING,
-      allowNull: false,
-      unique: true,
       validate: {
         notEmpty: true,
         isAlphanumeric: true,
@@ -37,15 +40,12 @@ module.exports = (sequelize, DataTypes) => {
     },
     password: {
       type: DataTypes.STRING,
-      allowNull: false,
       validate: {
         notEmpty: true
       }
     },
     email: {
       type: DataTypes.STRING,
-      unique: true,
-      allowNull: false,
       validate: {
         notEmpty: true,
         isEmail: true
@@ -64,13 +64,18 @@ module.exports = (sequelize, DataTypes) => {
       }
     },
     googleId: {
-      type: DataTypes.STRING,
-      unique: true
+      type: DataTypes.STRING
     },
     facebookId: {
-      type: DataTypes.STRING,
-      unique: true
+      type: DataTypes.STRING
     },
+    temp: DataTypes.JSON,
+    /*
+    temp: {
+      googleId: '12312312312'// unconfirm id,
+      facebookId: '8458935932'// unconfirm id,
+    }
+    */
     resetPasswordToken: {
       type: DataTypes.STRING,
       set (val) {
@@ -90,7 +95,6 @@ module.exports = (sequelize, DataTypes) => {
     },
     isEmailConfirmed: {
       type: DataTypes.BOOLEAN,
-      allowNull: false,
       defaultValue: false
     },
     tokenEmailConfirm: {
@@ -105,7 +109,6 @@ module.exports = (sequelize, DataTypes) => {
     },
     locked: { // Lock account by admin
       type: DataTypes.BOOLEAN,
-      allowNull: false,
       defaultValue: false
     },
     inActived: { // Deleting account
@@ -135,6 +138,18 @@ module.exports = (sequelize, DataTypes) => {
   User.prototype.getFullName = function () {
     let profile = this.get('profile')
     return profile ? profile.fullname : ''
+  }
+
+  User.prototype.toJSON = function () {
+    let values = Object.assign({}, this.get())
+    let returnFields = [
+      'uuid', 'profile', 'username', 'email', 'reserve_email',
+      'isEmailConfirmed'
+    ]
+    for (var attr in values) {
+      !returnFields.includes(attr) && delete values[attr]
+    }
+    return values
   }
 
   User.prototype.genValidConfirmEmailToken = async function () {
@@ -218,13 +233,7 @@ module.exports = (sequelize, DataTypes) => {
   }
 
   User.findValidOne = async function (options) {
-    if (options && options.attributes && options.attributes instanceof Array) {
-      let attr = options.attributes
-      if (!attr.includes('id')) attr.push('id')
-      if (!attr.includes('isEmailConfirmed')) attr.push('isEmailConfirmed')
-      if (!attr.includes('inActived')) attr.push('inActived')
-      if (!attr.includes('locked')) attr.push('locked')
-    }
+    validator.enableSecureFields(options)
     let res = await User.findOne(options)
     return res
   }

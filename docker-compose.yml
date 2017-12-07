@@ -16,7 +16,6 @@ services:
      - SMPT_HOST=mailgateway.cdg.co.th
     extra_hosts:
      - "mailgateway.cdg.co.th:10.254.7.51"
-
   acc-db:
     build: ./account-db
     container_name: "acc-postgres-db"
@@ -31,6 +30,8 @@ services:
     links:
      - acc-service
     ports:
-      - 81:80
+      - 80:80
+    extra_hosts:
+     - "dev.cdg.co.th:10.0.75.1" ## for Dev local only
 volumes:
   acc-db-data:

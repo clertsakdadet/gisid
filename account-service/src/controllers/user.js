@@ -4,8 +4,9 @@ const AppError = require('../utils/errors/appError')
 const mailer = require('./mailer')
 const validator = require('../utils/validator')
 const utils = require('../utils/utils')
+const userController = {}
 
-const confirmEmail = async (ctx, _next) => {
+userController.confirmEmail = async (ctx, _next) => {
   const token = ctx.params.token
   validator.validateToken(ctx, !0)
 
@@ -24,7 +25,7 @@ const confirmEmail = async (ctx, _next) => {
   }
 }
 
-const signUp = async (ctx, _next) => {
+userController.signUp = async (ctx, _next) => {
   const body = ctx.request.body
   validator.validateFullname(ctx)
   validator.validateUsername(ctx)
@@ -49,41 +50,39 @@ const signUp = async (ctx, _next) => {
   }
 }
 
-const forgetPassword = async (ctx, _next) => {
+userController.forgetPassword = async (ctx, _next) => {
   const body = ctx.request.body
-  validator.validateEmail(ctx)
-
-  if (ctx.errors) {
-    throw new AppError('Validation Failed.', errorCode.UnprocessableEntity, ctx.errors)
-  } else {
-    try {
-      body.email = utils.normalizeEmail(body.email)
-      let emailExist = await models.User.findValidOne({
-        where: {
-          email: body.email
-        },
-        attributes: ['id', 'email', 'profile']
-      })
-      if (!emailExist) {
-        throw new AppError('The email address doesn\'t exist. Enter a different email address or get a new account.', errorCode.UnprocessableEntity)
-      }
-      let isInvalidate = emailExist.isInvalidate()
-      if (isInvalidate) {
-        throw new AppError(isInvalidate, errorCode.UnprocessableEntity)
-      }
-      let token = await emailExist.getValidResetPasswordToken(!0)
-      mailer.sentConfirmResetPassword(emailExist, token)
-      ctx.body = {
-        success: !0,
-        message: 'An email has been sent to ' + body.email + ' with further instructions on how to reset your password.'
-      }
-    } catch (err) {
-      throw err
+  try {
+    let username = body.username
+    let email = utils.normalizeEmail(body.email)
+    if (!username && !email) {
+      throw new AppError('Username or Email is required.', errorCode.UnprocessableEntity)
     }
+    let options = { where: { }, attributes: ['id', 'email', 'profile'] }
+    if (username) options.where.username = username
+    else {
+      options.where.email = email
+    }
+    let account = await models.User.findValidOne(options)
+    if (!account) {
+      throw new AppError('This account doesn\'t exist.', errorCode.UnprocessableEntity)
+    }
+    let isInvalidate = account.isInvalidate()
+    if (isInvalidate) {
+      throw new AppError(isInvalidate, errorCode.UnprocessableEntity)
+    }
+    let token = await account.getValidResetPasswordToken(!0)
+    mailer.sentConfirmResetPassword(account, token)
+    ctx.body = {
+      success: !0,
+      message: 'An email has been sent to ' + email + ' with further instructions on how to reset your password.'
+    }
+  } catch (err) {
+    throw err
   }
 }
 
-const confirmPasswordReset = async (ctx, _next) => {
+userController.confirmPasswordReset = async (ctx, _next) => {
   const token = ctx.params.token
   validator.validateToken(ctx, !0)
 
@@ -96,7 +95,7 @@ const confirmPasswordReset = async (ctx, _next) => {
           resetPasswordToken: token,
           resetPasswordExpire: { $gt: new Date() }
         },
-        attributes: ['username']
+        attributes: ['username', 'email']
       })
       if (!tokenValid) {
         throw new AppError('Token is invalid or expired.', errorCode.UnprocessableEntity)
@@ -107,7 +106,8 @@ const confirmPasswordReset = async (ctx, _next) => {
       }
       ctx.body = {
         success: !0,
-        username: tokenValid.get('username')
+        username: tokenValid.get('username'),
+        email: tokenValid.get('email')
       }
     } catch (err) {
       throw err
@@ -115,7 +115,7 @@ const confirmPasswordReset = async (ctx, _next) => {
   }
 }
 
-const resetPassword = async (ctx, _next) => {
+userController.resetPassword = async (ctx, _next) => {
   const body = ctx.request.body
   validator.validateToken(ctx)
   validator.validatePassword(ctx)
@@ -152,7 +152,7 @@ const resetPassword = async (ctx, _next) => {
   }
 }
 
-const deleteAccount = async (ctx, _next) => {
+userController.deleteAccount = async (ctx, _next) => {
   const body = ctx.request.body
   validator.validateUsername(ctx)
   validator.validatePassword(ctx)
@@ -189,9 +189,9 @@ const deleteAccount = async (ctx, _next) => {
   }
 }
 
-const updatePassword = async (ctx, _next) => {
+userController.updatePassword = async (ctx, _next) => {
   const body = ctx.request.body
-  validator.validateUsername(ctx)
+  validator.validateAccountID(ctx)
   validator.validateCurrentPassword(ctx)
   validator.validatePassword(ctx)
   validator.validateConfirmPassword(ctx, body.password)
@@ -202,7 +202,7 @@ const updatePassword = async (ctx, _next) => {
     try {
       let account = await models.User.findValidOne({
         where: {
-          username: body.username
+          uuid: body.id
         },
         attributes: ['id', 'password']
       })
@@ -212,6 +212,10 @@ const updatePassword = async (ctx, _next) => {
       let isInvalidate = account.isInvalidate(true)
       if (isInvalidate) {
         throw new AppError(isInvalidate, errorCode.UnprocessableEntity)
+      }
+      let password = account.get('password')
+      if (!password) {
+        throw new AppError('Before process this action. You need to create password for this account.', errorCode.UnprocessableEntity)
       }
       let isMatch = await models.User.comparePassword(body.current_password, account.get('password'))
       if (!isMatch) {
@@ -229,7 +233,100 @@ const updatePassword = async (ctx, _next) => {
   }
 }
 
-const updateAccount = async (ctx, _next) => {
+userController.createPassword = async (ctx, _next) => {
+  const body = ctx.request.body
+  validator.validateAccountID(ctx)
+  validator.validatePassword(ctx)
+
+  if (ctx.errors) {
+    throw new AppError('Validation Failed.', errorCode.UnprocessableEntity, ctx.errors)
+  } else {
+    try {
+      let account = await models.User.findValidOne({
+        where: {
+          uuid: body.id
+        },
+        attributes: ['id', 'username', 'email', 'password']
+      })
+      if (!account) {
+        throw new AppError('This account doesn\'t exist.', errorCode.UnprocessableEntity)
+      }
+      let isInvalidate = account.isInvalidate(true)
+      if (isInvalidate) {
+        throw new AppError(isInvalidate, errorCode.UnprocessableEntity)
+      }
+      let password = account.get('password')
+      if (password) {
+        throw new AppError('This account is already created password.', errorCode.DataAlreadyExists)
+      }
+      let username = account.get('username')
+      let email = account.get('email')
+      if (!username && !email) {
+        throw new AppError('Username or Email is required.', errorCode.UnprocessableEntity)
+      }
+      let encryptPassword = await models.User.encryptPassword(body.password)
+      await account.update({ password: encryptPassword })
+      ctx.body = {
+        success: !0,
+        message: 'Your password has been successfully created.'
+      }
+    } catch (err) {
+      throw err
+    }
+  }
+}
+
+userController.unlinkGoogle = async (ctx, _next) => {
+  const body = ctx.request.body
+  validator.validateAccountID(ctx)
+  validator.validatePassword(ctx)
+
+  if (ctx.errors) {
+    throw new AppError('Validation Failed.', errorCode.UnprocessableEntity, ctx.errors)
+  } else {
+    try {
+      let account = await models.User.findValidOne({
+        where: {
+          uuid: body.id
+        },
+        attributes: ['id', 'username', 'email', 'password', 'googleId']
+      })
+      if (!account) {
+        throw new AppError('This account doesn\'t exist.', errorCode.UnprocessableEntity)
+      }
+      let isInvalidate = account.isInvalidate(true)
+      if (isInvalidate) {
+        throw new AppError(isInvalidate, errorCode.UnprocessableEntity)
+      }
+      let gmailAcc = account.get('googleId')
+      if (!gmailAcc) {
+        throw new AppError('This account doesn\'t link to any google account.', errorCode.UnprocessableEntity)
+      }
+      let username = account.get('username')
+      let email = account.get('email')
+      if (!username && !email) {
+        throw new AppError('Username or Email is required.', errorCode.UnprocessableEntity)
+      }
+      let password = account.get('password')
+      if (!password) {
+        throw new AppError('Before process this action. You need to create password for this account.', errorCode.UnprocessableEntity)
+      }
+      let isMatch = await models.User.comparePassword(body.password, account.get('password'))
+      if (!isMatch) {
+        throw new AppError('Your password isn\'t match', errorCode.UnprocessableEntity)
+      }
+      await account.update({ googleId: null })
+      ctx.body = {
+        success: !0,
+        message: 'Your linked Gmail accounts has been successfully removed.'
+      }
+    } catch (err) {
+      throw err
+    }
+  }
+}
+
+userController.updateAccount = async (ctx, _next) => {
   const body = ctx.request.body
   validator.validateAccountID(ctx)
   validator.validateUsername(ctx)
@@ -311,13 +408,4 @@ const updateAccount = async (ctx, _next) => {
   }
 }
 
-module.exports = {
-  signUp,
-  deleteAccount,
-  forgetPassword,
-  resetPassword,
-  updatePassword,
-  updateAccount,
-  confirmEmail,
-  confirmPasswordReset
-}
+module.exports = userController

@@ -1,5 +1,4 @@
 'use strict'
-
 module.exports = {
   up: (queryInterface, Sequelize) => {
     return queryInterface.createTable('Users', {
@@ -9,32 +8,30 @@ module.exports = {
         autoIncrement: true,
         type: Sequelize.INTEGER
       },
-      profile: Sequelize.JSON,
-      tokens: Sequelize.JSON,
-      username: {
-        type: Sequelize.STRING,
+      uuid: {
+        type: Sequelize.UUID,
         allowNull: false,
-        unique: true
+        defaultValue: Sequelize.UUIDV4
+      },
+      profile: Sequelize.JSON,
+      temp: Sequelize.JSON,
+      username: {
+        type: Sequelize.STRING
       },
       password: {
-        type: Sequelize.STRING,
-        allowNull: false
+        type: Sequelize.STRING
       },
       email: {
-        type: Sequelize.STRING,
-        unique: true,
-        allowNull: false
+        type: Sequelize.STRING
       },
       reserve_email: {
         type: Sequelize.STRING
       },
       googleId: {
-        type: Sequelize.STRING,
-        unique: true
+        type: Sequelize.STRING
       },
       facebookId: {
-        type: Sequelize.STRING,
-        unique: true
+        type: Sequelize.STRING
       },
       resetPasswordToken: {
         type: Sequelize.STRING
@@ -51,7 +48,6 @@ module.exports = {
       },
       isEmailConfirmed: {
         type: Sequelize.BOOLEAN,
-        allowNull: false,
         defaultValue: false
       },
       tokenEmailConfirm: {
@@ -62,7 +58,6 @@ module.exports = {
       },
       locked: { // Lock account by admin
         type: Sequelize.BOOLEAN,
-        allowNull: false,
         defaultValue: false
       },
       inActived: { // Deleting account
