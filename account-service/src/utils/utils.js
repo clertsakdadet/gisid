@@ -1,11 +1,21 @@
-function getRandomIntInclusive (min, max) {
+const utils = {}
+utils.getRandomIntInclusive = (min, max) => {
   // The maximum is inclusive and the minimum is inclusive
   min = Math.ceil(min)
   max = Math.floor(max)
   return Math.floor(Math.random() * (max - min + 1)) + min
 }
 
-function normalizeEmail (email) {
+utils.trackError = (err, file, fnName) => {
+  if (err) {
+    !err.fnTrack && (err.fnTrack = [])
+    !err.fileTrack && (err.fileTrack = [])
+    err.fileTrack.push(file)
+    err.fnTrack.push(fnName)
+  }
+}
+
+utils.normalizeEmail = (email) => {
   if (!email) return null
   let rawParts = email.split('@')
   let domain = rawParts.pop()
@@ -22,7 +32,11 @@ function normalizeEmail (email) {
   return parts.join('@')
 }
 
-module.exports = {
-  getRandomIntInclusive,
-  normalizeEmail
+utils.addAvatarToProfile = (provider, url, profile) => {
+  if (!profile || !url) return
+  if (!profile.avatars) profile.avatars = {}
+  profile.avatars[provider] = url
+  if (!profile.picture) profile.picture = url
 }
+
+module.exports = utils

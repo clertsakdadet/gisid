@@ -300,7 +300,7 @@ userController.unlinkGoogle = async (ctx, _next) => {
       }
       let gmailAcc = account.get('googleId')
       if (!gmailAcc) {
-        throw new AppError('This account doesn\'t link to any google account.', errorCode.UnprocessableEntity)
+        throw new AppError('This account doesn\'t link to any Google account.', errorCode.UnprocessableEntity)
       }
       let username = account.get('username')
       let email = account.get('email')
@@ -319,6 +319,56 @@ userController.unlinkGoogle = async (ctx, _next) => {
       ctx.body = {
         success: !0,
         message: 'Your linked Gmail accounts has been successfully removed.'
+      }
+    } catch (err) {
+      throw err
+    }
+  }
+}
+
+userController.unlinkFacebook = async (ctx, _next) => {
+  const body = ctx.request.body
+  validator.validateAccountID(ctx)
+  validator.validatePassword(ctx)
+
+  if (ctx.errors) {
+    throw new AppError('Validation Failed.', errorCode.UnprocessableEntity, ctx.errors)
+  } else {
+    try {
+      let account = await models.User.findValidOne({
+        where: {
+          uuid: body.id
+        },
+        attributes: ['id', 'username', 'email', 'password', 'facebookId']
+      })
+      if (!account) {
+        throw new AppError('This account doesn\'t exist.', errorCode.UnprocessableEntity)
+      }
+      let isInvalidate = account.isInvalidate(true)
+      if (isInvalidate) {
+        throw new AppError(isInvalidate, errorCode.UnprocessableEntity)
+      }
+      let gmailAcc = account.get('facebookId')
+      if (!gmailAcc) {
+        throw new AppError('This account doesn\'t link to any Facebook account.', errorCode.UnprocessableEntity)
+      }
+      let username = account.get('username')
+      let email = account.get('email')
+      if (!username && !email) {
+        throw new AppError('Username or Email is required.', errorCode.UnprocessableEntity)
+      }
+      let password = account.get('password')
+      if (!password) {
+        throw new AppError('Before process this action. You need to create password for this account.', errorCode.UnprocessableEntity)
+      }
+      let isMatch = await models.User.comparePassword(body.password, account.get('password'))
+      if (!isMatch) {
+        throw new AppError('Your password isn\'t match', errorCode.UnprocessableEntity)
+      }
+      await account.update({ facebookId: null })
+      ctx.body = {
+        success: !0,
+        message: 'Your linked Facebook accounts has been successfully removed.'
       }
     } catch (err) {
       throw err

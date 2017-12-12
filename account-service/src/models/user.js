@@ -24,7 +24,12 @@ module.exports = (sequelize, DataTypes) => {
     profile: DataTypes.JSON,
     /*
     profile: {
-      fullname: 'John Wick'
+      fullname: 'John Wick',
+      picture: 'http://xxxx.png',
+      avatars: {
+        google: 'http://xxxx.png',
+        facebook: 'http://xxxx.png',
+      }
     }
     */
     username: {

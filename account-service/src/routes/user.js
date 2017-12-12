@@ -13,10 +13,12 @@ router.post(accountAPIConfig.updatePassword, users.updatePassword)
 router.post(accountAPIConfig.createPassword, users.createPassword)
 router.post(accountAPIConfig.updateAccount, users.updateAccount)
 router.post(accountAPIConfig.forget, users.forgetPassword)
+//router.post(accountAPIConfig.uploadAvatar, users.uploadAvatar)
 
 router.get(accountAPIConfig.confirmEmail, users.confirmEmail)
 router.get(accountAPIConfig.confirmResetPassword, users.confirmPasswordReset)
 
 router.post(accountAPIConfig.unlinkGoogle, users.unlinkGoogle)
+router.post(accountAPIConfig.unlinkFacebook, users.unlinkFacebook)
 
 module.exports = router

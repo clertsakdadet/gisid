@@ -10,6 +10,7 @@ const config = {
       signUp: '/signup',
       forget: '/forget',
       delete: '/delete',
+      uploadAvatar: '/upload/avatar',
       updateAccount: '/update',
       updatePassword: '/update-password',
       createPassword: '/create-password',
@@ -19,7 +20,8 @@ const config = {
       confirmResetPassword: '/confirm-password-reset/:token',
       checkUserAvailable: '/username_available',
       checkEmailAvailable: '/email_available',
-      unlinkGoogle: '/unlink-google'
+      unlinkGoogle: '/unlink-google',
+      unlinkFacebook: '/unlink-facebook'
     },
     authenticateAPI: {
       prefix: '/g/auth',
@@ -27,13 +29,21 @@ const config = {
       signInWithGoogle: '/google',
       googleCallback: '/google/callback',
       confirmLinkGoogle: '/google/verify-password',
-      confirmLinkGooglePage: '/verify-with-password/google-oauth2/'
+      confirmLinkGooglePage: '/verify-with-password/google-oauth2/',
+      signInWithFacebook: '/facebook',
+      facebookCallback: '/facebook/callback',
+      confirmLinkFacebook: '/facebook/verify-password',
+      confirmLinkFacebookPage: '/verify-with-password/facebook-oauth2/'
     }
   },
   auth: {
     googleAuth: {
       clientID: process.env.GOOGLE_CLIENT_ID || '525584271682-l9q7af7ts8oimsa7oe9qtv3v6br5r4qf.apps.googleusercontent.com',
-      clientSecret: process.env.GOOGLE_CLIENT_SETCRET || 'fZRn86w5knk2wSPoDsJbFUW3'
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || 'fZRn86w5knk2wSPoDsJbFUW3'
+    },
+    facebookAuth: {
+      clientID: process.env.FACEBOOK_CLIENT_ID || '512865165757780',
+      clientSecret: process.env.FACEBOOK_CLIENT_SECRET || '1ec37c38f335266e750f5c8a0f3be8b9'
     }
   },
   mail: {
@@ -107,6 +117,22 @@ config.getPassportGoogleConfig = function () {
     clientSecret: this.auth.googleAuth.clientSecret,
     callbackURL: 'http://' + this.app.host + this.api.authenticateAPI.prefix + this.api.authenticateAPI.googleCallback,
     passReqToCallback: true
+  }
+}
+
+config.getPassportFacebookConfig = function () {
+  // callbackURL: https://gisid.co.th/g/auth/facebook/callback
+  return {
+    clientID: this.auth.facebookAuth.clientID,
+    clientSecret: this.auth.facebookAuth.clientSecret,
+    callbackURL: 'http://' + this.app.host + this.api.authenticateAPI.prefix + this.api.authenticateAPI.facebookCallback,
+    profileFields: ['id', 'email', 'first_name', 'last_name', 'displayName', 'photos'],
+    passReqToCallback: true,
+    enableProof: true
+    // authOptions: { scope: ['email', 'user_location'] }
+    // profileURL: 'https://graph.facebook.com/v2.11/me',
+    // authorizationURL: 'https://www.facebook.com/v2.11/dialog/oauth',
+    // tokenURL: 'https://graph.facebook.com/v2.11/oauth/access_token'
   }
 }
 

@@ -1,5 +1,11 @@
 {
   "UnprocessableEntity": 422,
   "DataAlreadyExists": 409,
-  "InternalServerError": 500
+  "InternalServerError": 500,
+  "NotReceiveInfo": "Unable to receive information.",
+  "ValidateFail": "Validation Failed.",
+  "WrongPassword": "Your password isn't match",
+  "AccountNotExist": "This account doesn't exist.",
+  "ReqUserOrEmail": "Username or Email is required.",
+  "ReqPassword": "Before process this action. You need to create password for this account."
 }
