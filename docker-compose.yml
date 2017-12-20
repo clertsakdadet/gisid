@@ -61,7 +61,6 @@ services:
       timeout: 5s
       retries: 5
   kong-gateway:
-    #image: kong:0.11.2
     build: ./kong
     container_name: kong_gateway
     depends_on:
@@ -92,6 +91,7 @@ services:
       - 443:443
     extra_hosts:
      - "dev.cdg.co.th:10.0.75.1" ## for Dev local only
+     - "gisid.cdg.co.th:10.254.7.23"
 volumes:
   acc-db-data:
   kong-db-data:
