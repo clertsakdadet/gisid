@@ -1,0 +1,35 @@
+<div class="login-container">
+  <div class="login-form-top">
+    <p>WELCOME TO GISID</p>
+  </div>
+  <div class="login-form-center">
+    <div class="header">
+      <h2>Login or create account</h2>
+    </div>
+    <div class="login-btn">
+      <p>
+        <a class="bt-connect bt-facebook" (click)="facebookLoginSubmit()">
+          <span>Connect with Facebook</span>
+        </a>
+      </p>
+      <p>
+        <a class="bt-connect bt-google" (click)="googleLoginSubmit()">
+          <span>Connect with Google</span>
+        </a>
+      </p>
+      <p>
+        <a class="bt-connect bt-register" (click)="loginSubmit()">
+          <span>Connect with Email</span>
+        </a>
+      </p>
+    </div>
+    <div class="footer">
+      <h4 class="heading-small">Not a member yet?
+        <a routerLink="/register/">Register now</a>
+      </h4>
+    </div>
+  </div>
+  <div class="login-form-bottom">
+    <p>© 2017 GIS Co.,Ltd. All rights reserved.</p>
+  </div>
+</div>
