@@ -89,6 +89,7 @@ services:
      - acc-service
     ports:
       - 80:80
+      - 443:443
     extra_hosts:
      - "dev.cdg.co.th:10.0.75.1" ## for Dev local only
 volumes:
