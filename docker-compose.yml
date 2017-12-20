@@ -33,10 +33,12 @@ services:
     links:
      - acc-db
     environment:
-     - NODE_ENV=production
+     #- NODE_ENV=production
+     - NODE_ENV=test
      - DB_HOSTNAME=acc-db
      - DB_PORT=5432
-     - HOSTNAME=gisid.cdg.co.th
+     #- HOSTNAME=gisid.cdg.co.th
+     - HOSTNAME=dev.cdg.co.th
      - SMPT_HOST=mailgateway.cdg.co.th
     extra_hosts:
      - "mailgateway.cdg.co.th:10.254.7.51"
