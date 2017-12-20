@@ -1,0 +1,2 @@
+- Command for create Self Cert
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -config "E:\Projects\GSB.Doc\cer\openssl\openssl.cnf" -keyout "E:/Projects/GSB.Doc/cer/openssl/output/dev-cdg-co-th.key" -out "E:/Projects/GSB.Doc/cer/openssl/output/dev-cdg-co-th.crt"

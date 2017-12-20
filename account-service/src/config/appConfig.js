@@ -4,6 +4,9 @@ const config = {
     port: process.env.PORT || 3000,
     name: process.env.APP_NAME || 'account service'
   },
+  path: {
+    upload: '/upload'
+  },
   api: {
     accountAPI: {
       prefix: '/g/account',
@@ -34,6 +37,10 @@ const config = {
       facebookCallback: '/facebook/callback',
       confirmLinkFacebook: '/facebook/verify-password',
       confirmLinkFacebookPage: '/verify-with-password/facebook-oauth2/'
+    },
+    checkAPI: {
+      prefix: '/g/check',
+      versions: '/version'
     }
   },
   auth: {

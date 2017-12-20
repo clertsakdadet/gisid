@@ -1,13 +1,16 @@
 const AppError = require('../utils/errors/appError')
 const errorCode = require('../config/msgConfig.json')
 const logger = require('../utils/logger/account_log')
+const utils = require('../utils/utils')
 
 async function handleError (ctx, next) {
   try {
     await next()
   } catch (err) {
-    ctx.status = err.status || err.code || errorCode.InternalServerError
-    if (err instanceof AppError) {
+    utils.parseSpecialErrorCode(err)
+    ctx.status = (Number.isInteger(err.status) ? err.status : null) ||
+    (Number.isInteger(err.code) ? err.code : null) || errorCode.InternalServerError
+    if (err instanceof AppError || utils.isSpecialError(err)) {
       ctx.body = {
         success: !1,
         message: err.message,

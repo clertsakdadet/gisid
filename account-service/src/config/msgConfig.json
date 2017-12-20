@@ -7,5 +7,15 @@
   "WrongPassword": "Your password isn't match",
   "AccountNotExist": "This account doesn't exist.",
   "ReqUserOrEmail": "Username or Email is required.",
-  "ReqPassword": "Before process this action. You need to create password for this account."
+  "ReqPassword": "Before process this action. You need to create password for this account.",
+  "ReqCurrentPassword": "Current password is required.",
+  "ReqToken": "Token is required.",
+  "ReqID": "id is required.",
+  "CheckUsernameLen": "Username must be at least 4 characters.",
+  "CheckPasswordLen": "Password must be at least 4 characters.",
+  "CheckFullNameLen": "Full name must be at least 4 characters.",
+  "CheckMatchPassword": "Passwords must match.",
+  "CheckValidEmail": "Please enter a valid email address.",
+  "CheckValidID": "id is invalid",
+  "UsernameNotAcceptSpecialChars": "Username not accepting special characters."
 }

@@ -1,11 +1,35 @@
 version: '2.2'
 services:
+  kong-database:
+    image: postgres:9.4-alpine
+    container_name: kong_database
+    environment:
+      - POSTGRES_USER=kong
+      - POSTGRES_DB=kong
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - kong-db-data:/var/lib/postgresql/data
+  kong-migration:
+    image: kong:0.11-alpine
+    container_name: kong_migration
+    depends_on:
+      kong-database:
+        condition: service_healthy
+    environment:
+      - KONG_DATABASE=postgres
+      - KONG_PG_HOST=kong-database
+    command: kong migrations up
   acc-service:
     build: ./account-service
     container_name: account_service
-    command: sh -c './wait-for acc-db:5432 -- npm start'
+    #command: sh -c './wait-for acc-db:5432 -- npm start'
     depends_on:
-     - acc-db
+      acc-db:
+        condition: service_healthy
     links:
      - acc-db
     environment:
@@ -16,6 +40,13 @@ services:
      - SMPT_HOST=mailgateway.cdg.co.th
     extra_hosts:
      - "mailgateway.cdg.co.th:10.254.7.51"
+    volumes:
+     - acc-images-data:/usr/src/app/upload
+    healthcheck:
+      test: curl -I -s -L http://127.0.0.1:3000/g/check/version
+      interval: 10s
+      timeout: 5s
+      retries: 5
   acc-db:
     build: ./account-db
     container_name: "acc-postgres-db"
@@ -24,6 +55,33 @@ services:
       - acc-db-data:/var/lib/postgresql/data
     ports:
       - 5455:5432
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  kong-gateway:
+    #image: kong:0.11.2
+    build: ./kong
+    container_name: kong_gateway
+    depends_on:
+      kong-database:
+        condition: service_healthy
+      acc-service:
+        condition: service_healthy
+    environment:
+      - KONG_DATABASE=postgres
+      - KONG_PG_HOST=kong-database
+      - KONG_PG_DATABASE=kong
+    ports:
+      - 8000:8000
+      - 8001:8001
+      - 8443:8443
+      - 8444:8444
+    healthcheck:
+      test: ["CMD-SHELL", "curl -I -s -L http://127.0.0.1:8000 || exit 1"]
+      interval: 5s
+      retries: 10
   nginx:
     build: ./reverse-proxy
     container_name: "rev_proxy"
@@ -35,3 +93,5 @@ services:
      - "dev.cdg.co.th:10.0.75.1" ## for Dev local only
 volumes:
   acc-db-data:
+  kong-db-data:
+  acc-images-data:

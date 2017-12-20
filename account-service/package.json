@@ -16,6 +16,7 @@
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "crypto-promise": "^2.0.0",
+    "fs-extra": "^5.0.0",
     "koa": "^2.4.1",
     "koa-bodyparser": "^4.2.0",
     "koa-helmet": "^3.3.0",
@@ -32,6 +33,7 @@
     "pg-hstore": "^2.3.2",
     "sequelize": "^4.22.9",
     "sequelize-cli": "^3.1.0",
+    "sharp": "^0.18.4",
     "validator": "^9.1.1",
     "winston": "^2.4.0",
     "winston-daily-rotate-file": "^1.7.2"

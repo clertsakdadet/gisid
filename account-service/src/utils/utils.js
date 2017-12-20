@@ -1,4 +1,11 @@
 const utils = {}
+const errorCode = require('../config/msgConfig.json')
+const path = require('path')
+
+utils.getRootPath = () => {
+  return path.dirname(require.main.filename || process.mainModule.filename)
+}
+
 utils.getRandomIntInclusive = (min, max) => {
   // The maximum is inclusive and the minimum is inclusive
   min = Math.ceil(min)
@@ -37,6 +44,22 @@ utils.addAvatarToProfile = (provider, url, profile) => {
   if (!profile.avatars) profile.avatars = {}
   profile.avatars[provider] = url
   if (!profile.picture) profile.picture = url
+}
+
+utils.isSpecialError = err => {
+  if (err && err.code) {
+    switch (err.code) {
+      case 'LIMIT_FILE_SIZE':
+        return !0
+    }
+  }
+  return !1
+}
+
+utils.parseSpecialErrorCode = err => {
+  if (err && err.code === 'LIMIT_FILE_SIZE') {
+    err.status = errorCode.UnprocessableEntity
+  }
 }
 
 module.exports = utils

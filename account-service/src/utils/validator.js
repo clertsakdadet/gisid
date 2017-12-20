@@ -1,53 +1,54 @@
 // Document: https://github.com/RocksonZeta/koa-validate
+const msg = require('../config/msgConfig.json')
 const validator = {}
 
 validator.validateUsername = (ctx, isGet) => {
   let field = 'username'
   let chk = isGet ? ctx.checkParams(field) : ctx.checkBody(field)
-  chk.len(4, 20, 'Username must be at least 4 characters.')
-  .isAlphanumeric('Username not accepting special characters.')
+  chk.len(4, 20, msg.CheckUsernameLen)
+  .isAlphanumeric(msg.UsernameNotAcceptSpecialChars)
 }
 
 validator.validatePassword = (ctx, isGet) => {
   let field = 'password'
   let chk = isGet ? ctx.checkParams(field) : ctx.checkBody(field)
-  chk.len(6, 20, 'Password must be at least 4 characters.')
+  chk.len(6, 20, ctx.CheckPasswordLen)
 }
 
 validator.validateCurrentPassword = (ctx, isGet) => {
   let field = 'current_password'
   let chk = isGet ? ctx.checkParams(field) : ctx.checkBody(field)
-  chk.notEmpty('Current password is required.')
+  chk.notEmpty(msg.ReqCurrentPassword)
 }
 
 validator.validateConfirmPassword = (ctx, password, isGet) => {
   let field = 'confirm_password'
   let chk = isGet ? ctx.checkParams(field) : ctx.checkBody(field)
-  chk.eq(password, 'Passwords must match.')
+  chk.eq(password, msg.CheckMatchPassword)
 }
 
 validator.validateEmail = (ctx, isGet) => {
   let field = 'email'
   let chk = isGet ? ctx.checkParams(field) : ctx.checkBody(field)
-  chk.isEmail('Please enter a valid email address.')
+  chk.isEmail(msg.CheckValidEmail)
 }
 
 validator.validateFullname = (ctx, isGet) => {
   let field = 'fullname'
   let chk = isGet ? ctx.checkParams(field) : ctx.checkBody(field)
-  chk.len(4, 20, 'Full name must be at least 4 characters.')
+  chk.len(4, 20, msg.CheckFullNameLen)
 }
 
 validator.validateToken = (ctx, isGet) => {
   let field = 'token'
   let chk = isGet ? ctx.checkParams(field) : ctx.checkBody(field)
-  chk.notEmpty('Token is required.')
+  chk.notEmpty(msg.ReqToken)
 }
 
 validator.validateAccountID = (ctx, isGet) => {
   let field = 'id'
   let chk = isGet ? ctx.checkParams(field) : ctx.checkBody(field)
-  chk.notEmpty('id is required.').isUUID('id is invalid', 4)
+  chk.notEmpty(msg.ReqID).isUUID(msg.CheckValidID, 4)
 }
 
 validator.enableSecureFields = (options) => {
