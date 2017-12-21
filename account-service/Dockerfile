@@ -2,8 +2,8 @@
 FROM node:8.9.1
 
 # Set Proxy (This ENV only effect on build run time)
-ENV http_proxy http://10.254.7.89:8080
-ENV https_proxy http://10.254.7.89:8080
+#ENV http_proxy http://10.254.7.89:8080
+#ENV https_proxy http://10.254.7.89:8080
 
 # use changes to package.json to force Docker not to use the cache
 # when we change our application's nodejs dependencies:
