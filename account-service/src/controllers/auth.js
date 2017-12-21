@@ -30,18 +30,19 @@ passport.use(new FacebookStrategy(config.getPassportFacebookConfig(), (ctx, acce
 auth.signIn = async (ctx, _next) => {
   const body = ctx.request.body
   try {
+    validator.validateAccount(ctx)
     validator.validatePassword(ctx)
     if (ctx.errors) {
       throw new AppError(msg.ValidateFail, msg.UnprocessableEntity, ctx.errors)
     }
-    let username = body.username
-    let email = utils.normalizeEmail(body.email)
-    if (!username && !email) {
-      throw new AppError(msg.ReqUserOrEmail, msg.UnprocessableEntity)
-    }
+    let acc = body.account
     let options = { where: { } }
-    if (username) options.where.username = username
-    else options.where.email = email
+    if (acc && validator.check.isEmail(acc)) {
+      let email = utils.normalizeEmail(body.email)
+      options.where.email = email
+    } else {
+      options.where.username = acc
+    }
     let account = await models.User.findValidOne(options)
     if (!account) {
       throw new AppError(msg.AccountNotExist, msg.UnprocessableEntity)

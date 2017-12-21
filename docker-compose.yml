@@ -33,12 +33,14 @@ services:
     links:
      - acc-db
     environment:
-     #- NODE_ENV=production
-     - NODE_ENV=test
+     - NODE_ENV=production
+     - HOSTNAME=gisid.cdg.co.th
+     - WEB_DOMAIN=gisid.cdg.co.th
+    # - NODE_ENV=test
+    # - HOSTNAME=dev.cdg.co.th
+    # - WEB_DOMAIN=dev.cdg.co.th
      - DB_HOSTNAME=acc-db
      - DB_PORT=5432
-     #- HOSTNAME=gisid.cdg.co.th
-     - HOSTNAME=dev.cdg.co.th
      - SMPT_HOST=mailgateway.cdg.co.th
     extra_hosts:
      - "mailgateway.cdg.co.th:10.254.7.51"
@@ -83,6 +85,11 @@ services:
       test: ["CMD-SHELL", "curl -I -s -L http://127.0.0.1:8000 || exit 1"]
       interval: 5s
       retries: 10
+  #kongfig:
+  #  build: ./kongfig
+  #  container_name: kongfiger
+  #  links:
+  #   - kong-gateway
   nginx:
     build: ./reverse-proxy
     container_name: "rev_proxy"

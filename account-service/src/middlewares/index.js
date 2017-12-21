@@ -1,7 +1,7 @@
 'use strict'
 
 module.exports = function (app) {
-  let helmet = require('koa-helmet')()
+  let helmet = require('koa-helmet')
   let compose = require('koa-compose')
   let common = require('./common')
   let bodyParser = require('koa-bodyparser')()
@@ -10,7 +10,8 @@ module.exports = function (app) {
   require('koa-validate')(app)
 
   app.use(compose([
-    helmet,
+    helmet(),
+    helmet.referrerPolicy({ policy: 'strict-origin' }),
     common.handleError,
     common.responseTime,
     bodyParser,

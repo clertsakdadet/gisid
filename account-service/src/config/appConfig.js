@@ -4,6 +4,10 @@ const config = {
     port: process.env.PORT || 3000,
     name: process.env.APP_NAME || 'account service'
   },
+  web: {
+    domain: process.env.WEB_DOMAIN || 'dev.cdg.co.th',
+    confirmEmailPage: '/confirm-email'
+  },
   path: {
     upload: '/upload'
   },
@@ -71,8 +75,8 @@ const config = {
       port: 587,
       secure: false,
       auth: {
-        user: 'sxneepjzd23gupay@ethereal.email',
-        pass: 'z4JVy8szbyTmCP4bwM'
+        user: 'tdfoeettzxxgoszb@ethereal.email',
+        pass: 'BxmzvYv1TNGfsWaZP1'
       }
     }
   },
@@ -112,11 +116,6 @@ config.getMailConfig = function () {
   return process.env.NODE_ENV === 'production' ? this.mail.SMTPConfig : this.mail.SMTPConfigDev
 }
 
-config.getEmailConfirmURL = function () {
-  // https://gisid.co.th/g/account/confirm-email?token=dcaddf644369
-  return 'https://' + this.app.host + this.api.accountAPI.prefix + this.api.accountAPI.confirmEmail.replace(':token', '')
-}
-
 config.getPassportGoogleConfig = function () {
   // callbackURL: https://gisid.co.th/g/auth/google/callback
   return {
@@ -146,6 +145,11 @@ config.getPassportFacebookConfig = function () {
 config.getResetPasswordConfirmURL = function () {
   // https://gisid.co.th/g/account/confirm-password-reset?token=dcaddf644369
   return 'https://' + this.app.host + this.api.accountAPI.prefix + this.api.accountAPI.confirmResetPassword.replace(':token', '')
+}
+
+config.getWebPageUrl = function (page) {
+  // https://gisid.co.th/g/account/confirm-password-reset?token=dcaddf644369
+  return 'https://' + this.web.domain + this.web[page] ? this.web[page] : '/error'
 }
 
 config.getLogConfig = function (name) {

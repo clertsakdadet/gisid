@@ -23,7 +23,7 @@ const sentConfirmEmail = async (email, token) => {
   let subject = 'Email address confirmation'
   let text = 'Click the link below to confirm your email and finish creating your account.\n\n\n\n' +
   'This link will expire in ' + config.mail.emailTokenValidFor + ' minutes and can only be used once.\n\n' +
-  config.getEmailConfirmURL() + token + '\n\n'
+  config.getWebPageUrl('confirmEmailPage') + '/' + token + '\n\n'
   sentEmail(config.mail.senderEmail, email, subject, text)
 }
 

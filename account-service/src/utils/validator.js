@@ -1,5 +1,6 @@
 // Document: https://github.com/RocksonZeta/koa-validate
 const msg = require('../config/msgConfig.json')
+const checkValid = require('validator')
 const validator = {}
 
 validator.validateUsername = (ctx, isGet) => {
@@ -7,6 +8,12 @@ validator.validateUsername = (ctx, isGet) => {
   let chk = isGet ? ctx.checkParams(field) : ctx.checkBody(field)
   chk.len(4, 20, msg.CheckUsernameLen)
   .isAlphanumeric(msg.UsernameNotAcceptSpecialChars)
+}
+
+validator.validateAccount = (ctx, isGet) => {
+  let field = 'account'
+  let chk = isGet ? ctx.checkParams(field) : ctx.checkBody(field)
+  chk.notEmpty(msg.ReqUserOrEmail)
 }
 
 validator.validatePassword = (ctx, isGet) => {
@@ -67,5 +74,8 @@ validator.onlyActive = (options) => {
   options.where.inActived = !1
   options.where.locked = !1
 }
+
+// Document: https://github.com/chriso/validator.js
+validator.check = checkValid
 
 module.exports = validator
