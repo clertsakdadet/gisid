@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+  <!-- Basic Page Needs
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <meta charset="utf-8">
+  <title>Demo Site :)</title>
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <!-- Mobile Specific Metas
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- FONT
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
+
+  <!-- CSS
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="stylesheet" href="../demo/css/normalize.css">
+  <link rel="stylesheet" href="../demo/css/skeleton.css">
+  <link rel="stylesheet" href="../demo/css/custom.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+
+  <!-- Favicon
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="icon" type="image/png" href="images/favicon.png">
+
+</head>
+<body>
+
+  <!-- Primary Page Layout
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <div class="container">
+    <section class="header">
+      <h2 class="title">A 3rd Party Web Sample</h2>
+      <h6>Click button below for list your contact address</h6>
+      <a id="oauthBtn" class="button button-primary">GISID</a>
+      <hr/>
+      <div id="contactList" style="display:none;">
+          <table class="u-full-width">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Address</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Office</td>
+                  <td>Thailand Securities Depository Co., Ltd.
+                      62 The Stock Exchange of Thailand Building, 4, 6-7th Floor,
+                      Rachadapisek Road, Klongtoey,
+                      Bangkok 10110, Thailand
+                      Telephone : (66) 2229-2800, (66) 2654-5599
+                      Fax : (66) 2359-1259</td>
+                </tr>
+                <tr>
+                  <td>Home</td>
+                  <td>112/89 M.1 Prajasatja Rd., Samet, Amphoe meung
+                      Chonburi, 2000
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+      </div>
+    </section>
+  </div>
+
+<!-- End Document
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <script>
+    function HandlePopupResult(result) {
+      $("#contactList").show()
+    }
+    $(document).ready(function () {
+      $("#oauthBtn").click(function () {
+        window.open('/demo/login', 'authen', "height=450,width=450");
+      });
+    });
+  
+  </script>
+</body>
+</html>

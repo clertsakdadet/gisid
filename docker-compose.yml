@@ -1,32 +1,11 @@
 version: '2.2'
 services:
-  kong-database:
-    image: postgres:9.4-alpine
-    container_name: kong_database
-    environment:
-      - POSTGRES_USER=kong
-      - POSTGRES_DB=kong
-    healthcheck:
-      test: ["CMD", "pg_isready", "-U", "postgres"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    volumes:
-      - kong-db-data:/var/lib/postgresql/data
-  kong-migration:
-    image: kong:0.11-alpine
-    container_name: kong_migration
-    depends_on:
-      kong-database:
-        condition: service_healthy
-    environment:
-      - KONG_DATABASE=postgres
-      - KONG_PG_HOST=kong-database
-    command: kong migrations up
+  demo-web:
+    build: ./3rd_party_demo
+    container_name: demo_web
   acc-service:
     build: ./account-service
     container_name: account_service
-    #command: sh -c './wait-for acc-db:5432 -- npm start'
     depends_on:
       acc-db:
         condition: service_healthy
@@ -64,18 +43,30 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+  kong-database:
+    build: ./kong-db
+    container_name: kong_database
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - kong-db-data:/var/lib/postgresql/data
   kong-gateway:
     build: ./kong
     container_name: kong_gateway
     depends_on:
       kong-database:
         condition: service_healthy
-      acc-service:
-        condition: service_healthy
     environment:
       - KONG_DATABASE=postgres
       - KONG_PG_HOST=kong-database
       - KONG_PG_DATABASE=kong
+      - KONG_PG_USER=kongmin
+      - KONG_PG_PASSWORD=27gJ2zpYw9GQgndH
+      - KONG_PG_PORT=5432
+    command: sh -c 'kong migrations up  && kong start'
     ports:
       - 8000:8000
       - 8001:8001
@@ -85,16 +76,12 @@ services:
       test: ["CMD-SHELL", "curl -I -s -L http://127.0.0.1:8000 || exit 1"]
       interval: 5s
       retries: 10
-  #kongfig:
-  #  build: ./kongfig
-  #  container_name: kongfiger
-  #  links:
-  #   - kong-gateway
   nginx:
     build: ./reverse-proxy
     container_name: "rev_proxy"
     links:
      - acc-service
+     - demo-web
     ports:
       - 80:80
       - 443:443

@@ -1,0 +1,4 @@
+- run below for migrate database
+docker run -p 1337:1337 --network="zenhub_default" --link kong_gateway:kong --link kong_database:kong_database --name konga-migration -e "NODE_ENV=development" -e "DB_DATABASE=konga" -e "DB_ADAPTER=postgres" -e "DB_HOST=kong-database" -e "DB_PORT=5432" -e "DB_USER=kongmin" -e "DB_PASSWORD=27gJ2zpYw9GQgndH" pantsel/konga:0.9.0
+- remove old and re-run below for production
+docker run -p 1337:1337 --network="zenhub_default" --link kong_gateway:kong --link kong_database:kong_database --name konga-dashboard -e "NODE_ENV=production" -e "DB_DATABASE=konga" -e "DB_ADAPTER=postgres" -e "DB_HOST=kong-database" -e "DB_PORT=5432" -e "DB_USER=kongmin" -e "DB_PASSWORD=27gJ2zpYw9GQgndH" pantsel/konga:0.9.0

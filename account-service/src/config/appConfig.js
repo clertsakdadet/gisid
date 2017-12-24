@@ -6,7 +6,8 @@ const config = {
   },
   web: {
     domain: process.env.WEB_DOMAIN || 'dev.cdg.co.th',
-    confirmEmailPage: '/confirm-email'
+    confirmEmailPage: '/confirm-email',
+    confirmResetPasswordPage: 'confirm-password-reset'
   },
   path: {
     upload: '/upload'
@@ -142,14 +143,8 @@ config.getPassportFacebookConfig = function () {
   }
 }
 
-config.getResetPasswordConfirmURL = function () {
-  // https://gisid.co.th/g/account/confirm-password-reset?token=dcaddf644369
-  return 'https://' + this.app.host + this.api.accountAPI.prefix + this.api.accountAPI.confirmResetPassword.replace(':token', '')
-}
-
 config.getWebPageUrl = function (page) {
-  // https://gisid.co.th/g/account/confirm-password-reset?token=dcaddf644369
-  return 'https://' + this.web.domain + this.web[page] ? this.web[page] : '/error'
+  return 'https://' + this.web.domain + (this.web[page] ? this.web[page] : '/error')
 }
 
 config.getLogConfig = function (name) {

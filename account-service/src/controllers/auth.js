@@ -38,7 +38,7 @@ auth.signIn = async (ctx, _next) => {
     let acc = body.account
     let options = { where: { } }
     if (acc && validator.check.isEmail(acc)) {
-      let email = utils.normalizeEmail(body.email)
+      let email = utils.normalizeEmail(acc)
       options.where.email = email
     } else {
       options.where.username = acc

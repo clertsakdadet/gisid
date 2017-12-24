@@ -23,7 +23,7 @@ const sentConfirmEmail = async (email, token) => {
   let subject = 'Email address confirmation'
   let text = 'Click the link below to confirm your email and finish creating your account.\n\n\n\n' +
   'This link will expire in ' + config.mail.emailTokenValidFor + ' minutes and can only be used once.\n\n' +
-  config.getWebPageUrl('confirmEmailPage') + '/' + token + '\n\n'
+  config.getWebPageUrl('confirmEmailPage') + '?token=' + token + '\n\n'
   sentEmail(config.mail.senderEmail, email, subject, text)
 }
 
@@ -32,7 +32,7 @@ const sentConfirmResetPassword = async (user, token) => {
   let text = user.getFullName() + ',\n\n' +
   'We received a request to change your password.\n\n' +
   'Click the link below to set a new password:\n\n' +
-  config.getResetPasswordConfirmURL() + token + '\n\n' +
+  config.getWebPageUrl('confirmResetPasswordPage') + '?token=' + token + '\n\n' +
   'If you didn\'t mean to reset your password. then you can just ignore this email, your password will not change.'
   sentEmail(config.mail.senderEmail, user.get('email'), subject, text)
 }
